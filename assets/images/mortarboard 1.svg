@@ -1,0 +1,34 @@
+<svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="mortarboard 1">
+<g id="g105">
+<g id="g107">
+<g id="Clip path group">
+<mask id="mask0_96_16915" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="38" height="38">
+<g id="clipPath113">
+<path id="path111" d="M0 3.8147e-06H38V38H0V3.8147e-06Z" fill="white"/>
+</g>
+</mask>
+<g mask="url(#mask0_96_16915)">
+<g id="g109">
+<g id="g115">
+<path id="path117" d="M29.059 13.4495V21.4056C29.059 22.6404 24.5547 24.3867 18.9982 24.3867C13.4418 24.3867 8.9375 22.6404 8.9375 21.4056V13.4495" stroke="#004C43" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g id="g119">
+<path id="path121" d="M19 16.9336L1.11328 10.5747L19 4.26386L36.8867 10.5747L19 16.9336Z" stroke="#004C43" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g id="g123">
+<path id="path125" d="M34.2109 11.7502V24.0898" stroke="#004C43" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g id="g127">
+<path id="path129" d="M36.4482 26.3228C36.4482 27.5576 35.4473 28.5586 34.2124 28.5586C32.9776 28.5586 31.9766 27.5576 31.9766 26.3228C31.9766 25.0879 32.9776 24.0869 34.2124 24.0869C35.4473 24.0869 36.4482 25.0879 36.4482 26.3228Z" stroke="#004C43" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g id="g131">
+<path id="path133" d="M34.2109 28.5604V33.7344" stroke="#004C43" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg>

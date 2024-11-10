@@ -1,0 +1,34 @@
+<svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="bed 2">
+<g id="g837">
+<g id="g839">
+<g id="Clip path group">
+<mask id="mask0_96_16854" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="38" height="38">
+<g id="clipPath845">
+<path id="path843" d="M0 3.8147e-06H38V38H0V3.8147e-06Z" fill="white"/>
+</g>
+</mask>
+<g mask="url(#mask0_96_16854)">
+<g id="g841">
+<path id="path847" d="M7.86719 33.8438H3.41406V29.3906H7.86719V33.8438Z" stroke="#004C43" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="path849" d="M30.1328 33.8438H34.5859V29.3906H30.1328V33.8438Z" stroke="#004C43" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+<g id="g851">
+<path id="path853" d="M33.918 16.7734H4.08203C2.44246 16.7734 1.11328 18.1026 1.11328 19.7422V29.3906H36.8867V19.7422C36.8867 18.1026 35.5576 16.7734 33.918 16.7734Z" stroke="#004C43" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g id="g855">
+<path id="path857" d="M30.875 4.15625H7.125C5.48543 4.15625 4.15625 5.48543 4.15625 7.125V16.7734H33.8437V7.125C33.8437 5.48543 32.5146 4.15625 30.875 4.15625Z" stroke="#004C43" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<path id="path859" d="M36.8867 24.9375H1.11328V29.3906H36.8867V24.9375Z" stroke="#004C43" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+<g id="g861">
+<path id="path863" d="M16.7734 16.7734H8.60938V14.0548C8.60938 13.0969 9.38593 12.3203 10.3439 12.3203H15.0389C15.9969 12.3203 16.7734 13.0969 16.7734 14.0548V16.7734Z" stroke="#004C43" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g id="g865">
+<path id="path867" d="M21.2266 16.7734H29.3906V14.0548C29.3906 13.0969 28.6141 12.3203 27.6561 12.3203H22.9611C22.0031 12.3203 21.2266 13.0969 21.2266 14.0548V16.7734Z" stroke="#004C43" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg>

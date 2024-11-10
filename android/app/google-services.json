@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "649073818397",
+    "project_id": "uptm--stay",
+    "storage_bucket": "uptm--stay.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:649073818397:android:10462b53b9ca1ab5dc3ff4",
+        "android_client_info": {
+          "package_name": "com.uptm.securestay"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAP964PzBC03F4LaiwU1-M5yLEmSKhLdkU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
