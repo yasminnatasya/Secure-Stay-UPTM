@@ -8,7 +8,7 @@ class BedroomlistItemModel {
   int baths;
   int monthlyRent;
   String description;
-  String imageUrl;
+  List<String> imageUrls; // List to hold multiple image URLs
   int deposit;
   String availableDate;
   String minimumStay;
@@ -23,7 +23,7 @@ class BedroomlistItemModel {
   bool nonsmoker;
   bool petLover;
   bool vegetarian;
-  bool isAvailable; // New field for availability status
+  bool isAvailable;
 
   BedroomlistItemModel({
     required this.id,
@@ -33,7 +33,7 @@ class BedroomlistItemModel {
     required this.baths,
     required this.monthlyRent,
     required this.description,
-    required this.imageUrl,
+    required this.imageUrls,
     required this.deposit,
     required this.availableDate,
     required this.minimumStay,
@@ -48,11 +48,15 @@ class BedroomlistItemModel {
     required this.nonsmoker,
     required this.petLover,
     required this.vegetarian,
-    required this.isAvailable, // Initialize isAvailable in constructor
+    required this.isAvailable,
   });
 
+  // Factory method to create an instance from Firestore data
   factory BedroomlistItemModel.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+    // Retrieve the list of image URLs from Firestore data
+    List<String> imageUrls = List<String>.from(data['image_urls'] ?? []);
 
     return BedroomlistItemModel(
       id: doc.id,
@@ -62,7 +66,7 @@ class BedroomlistItemModel {
       baths: (data['baths'] ?? 0).toInt(),
       monthlyRent: (data['monthly_rent'] ?? 0).toInt(),
       description: data['description'] ?? '',
-      imageUrl: data['image_url'] ?? '',
+      imageUrls: imageUrls, // Set the list of image URLs
       deposit: (data['deposit'] ?? 0).toInt(),
       availableDate: data['available_date'] ?? '',
       minimumStay: data['minimum_stay'] ?? '',
@@ -77,8 +81,20 @@ class BedroomlistItemModel {
       nonsmoker: data['nonsmoker'] ?? false,
       petLover: data['pet_lover'] ?? false,
       vegetarian: data['vegetarian'] ?? false,
-      isAvailable: data['is_available'] ?? true, // Default to true if missing
+      isAvailable: data['is_available'] ?? true,
     );
+  }
+
+  // Method to get the first image URL for pages that require a single image
+  String getFirstImageUrl() {
+    return imageUrls.isNotEmpty
+        ? imageUrls[0]
+        : 'default_image_url'; // Replace 'default_image_url' with a placeholder if needed
+  }
+
+  // Method to get all image URLs for pages that require editing all images
+  List<String> getAllImageUrls() {
+    return imageUrls;
   }
 
   Map<String, dynamic> toFirestore() {
@@ -89,7 +105,7 @@ class BedroomlistItemModel {
       'baths': baths,
       'monthly_rent': monthlyRent,
       'description': description,
-      'image_url': imageUrl,
+      'image_urls': imageUrls, // Store the list of image URLs in Firestore
       'deposit': deposit,
       'available_date': availableDate,
       'minimum_stay': minimumStay,
@@ -104,7 +120,7 @@ class BedroomlistItemModel {
       'nonsmoker': nonsmoker,
       'pet_lover': petLover,
       'vegetarian': vegetarian,
-      'is_available': isAvailable, // Add isAvailable to Firestore data
+      'is_available': isAvailable,
     };
   }
 }

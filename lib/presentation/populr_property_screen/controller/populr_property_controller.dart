@@ -37,8 +37,14 @@ class PopulrPropertyController extends GetxController {
         if (address.toLowerCase().contains('shamelin') && isAvailable) {
           print("Adding property: ${data['title']}");
 
+          // Retrieve the first image from image_urls array
+          List<dynamic>? imageUrls = data['image_urls'] as List<dynamic>?;
+          String firstImageUrl =
+              imageUrls != null && imageUrls.isNotEmpty ? imageUrls[0] : '';
+
           properties.add(PopularPropertyListItemModel(
-            image: data['image_url'] ?? '',
+            id: doc.id, // Add the document ID
+            image: firstImageUrl,
             name: data['title'] ?? 'No Title',
             address: address,
             price: '\RM${data['monthly_rent'] ?? 0}',
@@ -80,8 +86,14 @@ class PopulrPropertyController extends GetxController {
         if (address.toLowerCase().contains('shamelin') && isAvailable) {
           print("Adding limited property: ${data['title']}");
 
+          // Retrieve the first image from image_urls array
+          List<dynamic>? imageUrls = data['image_urls'] as List<dynamic>?;
+          String firstImageUrl =
+              imageUrls != null && imageUrls.isNotEmpty ? imageUrls[0] : '';
+
           properties.add(PopularPropertyListItemModel(
-            image: data['image_url'] ?? '',
+            id: doc.id, // Add the document ID
+            image: firstImageUrl,
             name: data['title'] ?? 'No Title',
             address: address,
             price: '\RM${data['monthly_rent'] ?? 0}',

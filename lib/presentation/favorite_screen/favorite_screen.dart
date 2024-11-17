@@ -1,11 +1,8 @@
-import 'package:uptm_secure_stay/presentation/home_screen_page/widgets/propertylist_item_widget.dart';
-import 'package:uptm_secure_stay/presentation/recommended_for_you_screen/controller/recommended_for_you_controller.dart';
-import 'package:uptm_secure_stay/presentation/recommended_for_you_screen/models/recommended_for_you_model.dart';
-import 'package:uptm_secure_stay/presentation/recommended_for_you_screen/widgets/propertygrid1_item_widget.dart';
-import 'package:uptm_secure_stay/widgets/animation_widget.dart';
-
-import 'controller/favorite_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
+import 'package:uptm_secure_stay/presentation/home_screen_page/widgets/propertylist_item_widget.dart';
+import 'controller/favorite_controller.dart';
 import 'package:uptm_secure_stay/core/app_export.dart';
 import 'package:uptm_secure_stay/widgets/app_bar/appbar_leading_image.dart';
 import 'package:uptm_secure_stay/widgets/app_bar/appbar_subtitle.dart';
@@ -19,13 +16,7 @@ class FavoriteScreen extends StatefulWidget {
 }
 
 class _FavoriteScreenState extends State<FavoriteScreen> {
-  FavoriteController favoriteController = Get.put(FavoriteController());
-  RecommendedForYouController recommendedForYouController =
-      Get.put(RecommendedForYouController());
-  @override
-  void initState() {
-    super.initState();
-  }
+  final FavoriteController favoriteController = Get.put(FavoriteController());
 
   @override
   Widget build(BuildContext context) {
@@ -40,12 +31,13 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
           children: [
             _buildHeader(),
             Expanded(
-              child: animationFunction(
-                0,
-                duration: Duration(milliseconds: 500),
-                GridView.builder(
-                  primary: false,
-                  shrinkWrap: true,
+              child: Obx(() {
+                if (favoriteController
+                    .favoriteModel.value.favoriteItemList.value.isEmpty) {
+                  return Center(child: Text("No favorite properties found."));
+                }
+
+                return GridView.builder(
                   padding:
                       EdgeInsets.symmetric(horizontal: 16.h, vertical: 24.v),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -54,47 +46,47 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                     mainAxisSpacing: 16.h,
                     crossAxisSpacing: 16.h,
                   ),
-                  itemCount: recommendedPropertyListItemList.length,
+                  itemCount: favoriteController
+                      .favoriteModel.value.favoriteItemList.value.length,
                   itemBuilder: (context, index) {
-                    var property = recommendedPropertyListItemList[index];
-                    return property.type == "/entry"
-                        ? RecommendedEntryFormat(
-                            image: property.image,
-                            name: property.name,
-                            address: property.address,
-                            price: property.price,
-                            type: property.type,
-                            onTap: () {
-                              Get.toNamed(AppRoutes.propertyDetailsScreen);
-                            },
-                            likeOnTap: () {
-                              property.isFavourite = !property.isFavourite;
-                              recommendedForYouController.update();
-                            },
-                            likeImage:
-                                _buildAnimatedLikeIcon(property.isFavourite),
-                          )
-                        : RecommendedFormat(
-                            image: property.image,
-                            name: property.name,
-                            address: property.address,
-                            price: property.price,
-                            type: property.type,
-                            bed: property.bed,
-                            bathtub: property.bathtub,
-                            onTap: () {
-                              Get.toNamed(AppRoutes.propertyDetailsScreen);
-                            },
-                            likeOnTap: () {
-                              property.isFavourite = !property.isFavourite;
-                              recommendedForYouController.update();
-                            },
-                            likeImage:
-                                _buildAnimatedLikeIcon(property.isFavourite),
-                          );
+                    var property = favoriteController
+                        .favoriteModel.value.favoriteItemList.value[index];
+
+                    String truncatedAddress =
+                        property.washington.value.length > 10
+                            ? "${property.washington.value.substring(0, 10)}..."
+                            : property.washington.value;
+
+                    return RecommendedFormat(
+                      image: property.grandtown.value,
+                      name: property.shermanOaks.value,
+                      address: truncatedAddress,
+                      price: '',
+                      type: '',
+                      bed: property.beds.value.toString(), // Pass beds
+                      bathtub: property.baths.value.toString(), // Pass baths
+                      onTap: () {
+                        // Pass the property ID directly
+                        Get.toNamed(
+                          AppRoutes.propertyDetailsScreen,
+                          parameters: {'propertyId': property.id.value},
+                        );
+                      },
+                      likeOnTap: () {
+                        property.three.value = !property.three.value;
+                        favoriteController.update();
+                      },
+                      likeImage: SvgPicture.asset(
+                        property.three.value
+                            ? ImageConstant.imgLikeGray900
+                            : ImageConstant.imgLike,
+                        height: 24.adaptSize,
+                        width: 24.adaptSize,
+                      ),
+                    );
                   },
-                ),
-              ),
+                );
+              }),
             ),
           ],
         ),
@@ -102,42 +94,20 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
     );
   }
 
-// Helper function for animated like icon
-  Widget _buildAnimatedLikeIcon(bool isFavourite) {
-    return AnimatedSwitcher(
-      duration: Duration(milliseconds: 300),
-      transitionBuilder: (Widget child, Animation<double> animation) {
-        return ScaleTransition(scale: animation, child: child);
-      },
-      child: ColorFiltered(
-        colorFilter: ColorFilter.mode(
-          isFavourite ? Colors.red : Colors.grey,
-          BlendMode.srcIn,
-        ),
-        child: Image.asset(
-          isFavourite ? ImageConstant.imgLikeGray900 : ImageConstant.imgLike,
-          key: ValueKey(isFavourite ? 'liked' : 'unliked'),
-        ),
-      ),
-    );
-  }
-
-  /// Section Widget
   Widget _buildHeader() {
     return Container(
-        padding: EdgeInsets.only(top: 18.v, bottom: 19.v),
-        decoration: AppDecoration.outlineGray10001,
-        child: CustomAppBar(
-            leadingWidth: 44.h,
-            leading: AppbarLeadingImage(
-                onTap: () {
-                  Get.back();
-                },
-                imagePath: ImageConstant.imgIcArrowLeft,
-                margin: EdgeInsets.only(left: 20.h, top: 2.v, bottom: 5.v)),
-            centerTitle: true,
-            title: AppbarSubtitle(
-              text: "lbl_favorite".tr,
-            )));
+      padding: EdgeInsets.only(top: 18.v, bottom: 19.v),
+      decoration: AppDecoration.outlineGray10001,
+      child: CustomAppBar(
+        leadingWidth: 44.h,
+        leading: AppbarLeadingImage(
+          onTap: () => Get.back(),
+          imagePath: ImageConstant.imgIcArrowLeft,
+          margin: EdgeInsets.only(left: 20.h, top: 2.v, bottom: 5.v),
+        ),
+        centerTitle: true,
+        title: AppbarSubtitle(text: "lbl_favorite".tr),
+      ),
+    );
   }
 }

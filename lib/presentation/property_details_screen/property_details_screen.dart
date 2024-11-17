@@ -44,6 +44,10 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
         setState(() {
           propertyData = doc.data();
 
+          // Retrieve image URLs array
+          List<dynamic> imageUrls = propertyData?['image_urls'] ?? [];
+          propertyData?['image_urls'] = imageUrls;
+
           // Update bedroomsListItemList based on Firestore data
           bedroomsListItemList = [
             BedRoomsListItemModel(
@@ -92,22 +96,25 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    propertyData?['title'] ?? 'No Name',
-                                    style: theme.textTheme.titleLarge,
-                                  ),
-                                  SizedBox(height: 8.v),
-                                  Text(
-                                    propertyData?['address'] ?? 'No Address',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.textTheme.bodyLarge!
-                                        .copyWith(color: appTheme.gray800),
-                                  ),
-                                ],
+                              Expanded(
+                                // Wrap the Column with Expanded
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      propertyData?['title'] ?? 'No Name',
+                                      style: theme.textTheme.titleLarge,
+                                    ),
+                                    SizedBox(height: 8.v),
+                                    Text(
+                                      propertyData?['address'] ?? 'No Address',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: theme.textTheme.bodyLarge!
+                                          .copyWith(color: appTheme.gray800),
+                                    ),
+                                  ],
+                                ),
                               ),
                               Text.rich(
                                 TextSpan(
@@ -267,13 +274,15 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   }
 
   Widget _buildImageStack() {
+    List<dynamic> imageUrls = propertyData?['image_urls'] ?? [];
+
     return SizedBox(
       height: 420.v,
       width: double.infinity,
       child: Stack(
         children: [
           PageView.builder(
-            itemCount: 2, // Adjust based on available images
+            itemCount: imageUrls.length, // Number of images available
             controller: pageController,
             onPageChanged: (value) {
               setState(() {
@@ -281,12 +290,15 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
               });
             },
             itemBuilder: (context, index) {
-              return CustomImageView(
-                imagePath: propertyData?['image_url'] ??
-                    ImageConstant.imgRectangle4429,
-                height: double.infinity,
+              return Container(
                 width: double.infinity,
-                fit: BoxFit.fill,
+                child: CustomImageView(
+                  imagePath: imageUrls[index] ?? ImageConstant.imgRectangle4429,
+                  height: 420.v, // Ensure the height is constrained
+                  width: double.infinity,
+                  fit:
+                      BoxFit.cover, // Use BoxFit.cover for better image scaling
+                ),
               );
             },
           ),
@@ -353,6 +365,12 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
     String ownerId = propertyData?['user_id'] ?? '';
     String chatId = generateChatId(ownerId, widget.propertyId);
 
+    // Check if image_urls array is available and has at least one item
+    String? imageUrl = propertyData?['image_urls'] != null &&
+            (propertyData!['image_urls'] as List).isNotEmpty
+        ? propertyData!['image_urls'][0]
+        : null;
+
     // Navigate to ChatDetailsScreen and pass chatId, ownerId, and propertyDetails
     Get.to(
       ChatDetailsScreen(
@@ -362,8 +380,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
           'title': propertyData?['title'] ?? 'No Name',
           'address': propertyData?['address'] ?? 'No Address',
           'monthlyRent': propertyData?['monthly_rent'] ?? 'N/A',
-          'imageUrl':
-              propertyData?['image_url'] ?? ImageConstant.imgRectangle4429,
+          'imageUrl': imageUrl, // Use the first image URL if available
           'propertyId': widget.propertyId, // Pass propertyId
         },
       ),

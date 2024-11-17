@@ -41,8 +41,7 @@ import 'package:uptm_secure_stay/presentation/property_details_one_screen/proper
 import 'package:uptm_secure_stay/presentation/property_details_one_screen/binding/property_details_one_binding.dart';
 import 'package:uptm_secure_stay/presentation/booking_details_screen/booking_details_screen.dart';
 import 'package:uptm_secure_stay/presentation/booking_details_screen/binding/booking_details_binding.dart';
-import 'package:uptm_secure_stay/presentation/payment_method_screen/payment_method_screen.dart';
-import 'package:uptm_secure_stay/presentation/payment_method_screen/binding/payment_method_binding.dart';
+
 import 'package:uptm_secure_stay/presentation/enter_location_screen/enter_location_screen.dart';
 import 'package:uptm_secure_stay/presentation/enter_location_screen/binding/enter_location_binding.dart';
 import 'package:uptm_secure_stay/presentation/expore_with_search_screen/expore_with_search_screen.dart';
@@ -57,10 +56,7 @@ import 'package:uptm_secure_stay/presentation/videocall_details_screen/videocall
 import 'package:uptm_secure_stay/presentation/videocall_details_screen/binding/videocall_details_binding.dart';
 // import 'package:uptm_secure_stay/presentation/add_property_home_screen/add_property_home_screen.dart';
 // import 'package:uptm_secure_stay/presentation/add_property_home_screen/binding/add_property_home_binding.dart';
-import 'package:uptm_secure_stay/presentation/add_property_details_home_screen/add_property_details_home_screen.dart';
-import 'package:uptm_secure_stay/presentation/add_property_details_home_screen/binding/add_property_details_home_binding.dart';
-import 'package:uptm_secure_stay/presentation/add_property_details_home_filled_screen/add_property_details_home_filled_screen.dart';
-import 'package:uptm_secure_stay/presentation/add_property_details_home_filled_screen/binding/add_property_details_home_filled_binding.dart';
+
 // import 'package:uptm_secure_stay/presentation/add_property_details_home1_screen/add_property_details_home1_screen.dart';
 // import 'package:uptm_secure_stay/presentation/add_property_details_home1_screen/binding/add_property_details_home1_binding.dart';
 
@@ -394,14 +390,6 @@ class AppRoutes {
       ],
     ),
     GetPage(
-      name: paymentMethodScreen,
-      page: () => PaymentMethodScreen(),
-      transition: Transition.rightToLeft,
-      bindings: [
-        PaymentMethodBinding(),
-      ],
-    ),
-    GetPage(
       name: enterLocationScreen,
       page: () => EnterLocationScreen(),
       transition: Transition.rightToLeft,
@@ -488,22 +476,6 @@ class AppRoutes {
     //     AddPropertyHomeBinding(),
     //   ],
     // ),
-    GetPage(
-      name: addPropertyDetailsHomeScreen,
-      page: () => AddPropertyDetailsHomeScreen(),
-      transition: Transition.rightToLeft,
-      bindings: [
-        AddPropertyDetailsHomeBinding(),
-      ],
-    ),
-    GetPage(
-      name: addPropertyDetailsHomeFilledScreen,
-      page: () => AddPropertyDetailsHomeFilledScreen(),
-      transition: Transition.rightToLeft,
-      bindings: [
-        AddPropertyDetailsHomeFilledBinding(),
-      ],
-    ),
     // GetPage(
     //   name: addPropertyDetailsHome1Screen,
     //   page: () => AddPropertyDetailsHome1Screen(),

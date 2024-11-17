@@ -1,3 +1,4 @@
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:uptm_secure_stay/presentation/home_screen_page/widgets/propertylist_item_widget.dart';
 import 'package:uptm_secure_stay/presentation/recommended_for_you_screen/models/recommended_for_you_model.dart';
 import 'package:uptm_secure_stay/widgets/animation_widget.dart';
@@ -25,6 +26,10 @@ class _RecommendedForYouScreenState extends State<RecommendedForYouScreen> {
   @override
   Widget build(BuildContext context) {
     mediaQueryData = MediaQuery.of(context);
+
+    // Ensure the controller stream is active
+    recommendedForYouController.getAccommodationsStream();
+
     return Scaffold(
       backgroundColor: appTheme.white,
       body: SafeArea(
@@ -58,11 +63,26 @@ class _RecommendedForYouScreenState extends State<RecommendedForYouScreen> {
                         var property = recommendedForYouController
                             .accommodationsList[index];
 
+                        // Truncate long address strings
+                        String truncatedAddress = property.address != null &&
+                                property.address!.length > 10
+                            ? "${property.address!.substring(0, 10)}..."
+                            : property.address ?? 'No Address';
+
+                        // Select the appropriate SVG icon for the like button
+                        final likeIcon = SvgPicture.asset(
+                          property.isFavourite
+                              ? ImageConstant.imgLikeGray900
+                              : ImageConstant.imgLike,
+                          height: 24.adaptSize,
+                          width: 24.adaptSize,
+                        );
+
                         return property.type == "/entry"
                             ? RecommendedEntryFormat(
                                 image: property.image ?? '',
                                 name: property.name ?? 'Unnamed Property',
-                                address: property.address ?? 'No Address',
+                                address: truncatedAddress,
                                 price: property.price ?? 'N/A',
                                 type: property.type ?? '',
                                 onTap: () {
@@ -75,13 +95,12 @@ class _RecommendedForYouScreenState extends State<RecommendedForYouScreen> {
                                   recommendedForYouController
                                       .toggleFavorite(property.id ?? '');
                                 },
-                                likeImage: _buildAnimatedLikeIcon(
-                                    property.isFavourite), // Use animated icon
+                                likeImage: likeIcon, // Use the SVG icon here
                               )
                             : RecommendedFormat(
                                 image: property.image ?? '',
                                 name: property.name ?? 'Unnamed Property',
-                                address: property.address ?? 'No Address',
+                                address: truncatedAddress,
                                 price: property.price ?? 'N/A',
                                 type: property.type ?? '',
                                 bed: property.bed ?? 'N/A',
@@ -96,8 +115,7 @@ class _RecommendedForYouScreenState extends State<RecommendedForYouScreen> {
                                   recommendedForYouController
                                       .toggleFavorite(property.id ?? '');
                                 },
-                                likeImage: _buildAnimatedLikeIcon(
-                                    property.isFavourite), // Use animated icon
+                                likeImage: likeIcon, // Use the SVG icon here
                               );
                       },
                     ),

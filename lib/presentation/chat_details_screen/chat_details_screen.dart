@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:uptm_secure_stay/services/encryption_helper.dart';
 import 'controller/chat_details_controller.dart';
 
 class ChatDetailsScreen extends StatefulWidget {
@@ -42,8 +43,15 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
           .doc(widget.ownerId)
           .get();
       if (doc.exists) {
+        String encryptedName = doc['name'] ?? "Unknown";
+
+        // Decrypt the name if it's not "Unknown"
+        String decryptedName = encryptedName != "Unknown"
+            ? EncryptionHelper.decrypt(encryptedName)
+            : "Unknown";
+
         setState(() {
-          contactName = doc['name'] ?? "Unknown";
+          contactName = decryptedName;
         });
       }
     } catch (e) {
@@ -100,11 +108,12 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.propertyDetails['title'] ?? 'Property Title',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(
+                  widget.propertyDetails['title'] ?? 'Property Title',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
                 Text(widget.propertyDetails['address'] ?? 'Property Address'),
-                Text("\$${widget.propertyDetails['monthlyRent']}/mo"),
+                Text("\RM${widget.propertyDetails['monthlyRent']}/mo"),
               ],
             ),
           ),
@@ -124,7 +133,8 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
       builder: (context, snapshot) {
         if (!snapshot.hasData) return Container();
 
-        final chatData = snapshot.data!.data() as Map<String, dynamic>;
+        final chatData = snapshot.data?.data() as Map<String, dynamic>? ?? {};
+
         final bool otpRequested = chatData['otpRequested'] ?? false;
         final DateTime? otpExpiration =
             (chatData['otpExpiration'] as Timestamp?)?.toDate();
@@ -250,7 +260,8 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
       builder: (context, snapshot) {
         if (!snapshot.hasData) return Container();
 
-        final chatData = snapshot.data!.data() as Map<String, dynamic>;
+        final chatData = snapshot.data?.data() as Map<String, dynamic>? ?? {};
+
         final bool otpRequested = chatData['otpRequested'] ?? false;
         final String otpStatus = chatData['otpStatus'] ?? 'Not Sent';
         final DateTime? otpExpiration =
@@ -306,10 +317,12 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
           .doc(widget.propertyDetails['propertyId'])
           .get(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return Container();
+        if (!snapshot.hasData || snapshot.data?.data() == null) {
+          return Container(); // Show nothing if data is missing
+        }
 
-        // Check the booking confirmation status
-        final accommodationData = snapshot.data!.data() as Map<String, dynamic>;
+        final accommodationData =
+            snapshot.data?.data() as Map<String, dynamic>? ?? {};
         final bool isConfirmed = accommodationData['confirmed'] ?? false;
 
         return Container(
@@ -395,7 +408,8 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
           reverse: true,
           itemCount: messages.length,
           itemBuilder: (context, index) {
-            final messageData = messages[index];
+            final messageData =
+                messages[index].data() as Map<String, dynamic>? ?? {};
             final isCurrentUser = messageData['senderId'] ==
                 chatDetailsController.getCurrentUserId();
             return Align(
@@ -434,6 +448,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
 
             final chatData =
                 snapshot.data?.data() as Map<String, dynamic>? ?? {};
+
             bool isOtpRequested = chatData['otpRequested'] ?? false;
 
             return Column(

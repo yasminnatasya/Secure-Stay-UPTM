@@ -95,10 +95,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     ]);
   }
 
-  /// Navigates to the verificationScreen when the action is triggered.
-  onTapSend() {
-    Get.toNamed(
-      AppRoutes.verificationScreen,
-    );
+  /// Trigger password reset email sending when the action is triggered.
+  void onTapSend() {
+    forgotPasswordController.sendPasswordResetEmail();
   }
 }

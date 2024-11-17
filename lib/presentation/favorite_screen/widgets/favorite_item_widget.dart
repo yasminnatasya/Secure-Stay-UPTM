@@ -1,22 +1,20 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../controller/favorite_controller.dart';
 import '../models/favorite_item_model.dart';
-import 'package:flutter/material.dart';
 import 'package:uptm_secure_stay/core/app_export.dart';
 import 'package:uptm_secure_stay/widgets/custom_checkbox_button.dart';
 import 'package:uptm_secure_stay/widgets/custom_icon_button.dart';
 
-// ignore: must_be_immutable
 class FavoriteItemWidget extends StatelessWidget {
+  final FavoriteItemModel favoriteItemModelObj;
+
   FavoriteItemWidget(
     this.favoriteItemModelObj, {
     Key? key,
-  }) : super(
-          key: key,
-        );
+  }) : super(key: key);
 
-  FavoriteItemModel favoriteItemModelObj;
-
-  var controller = Get.find<FavoriteController>();
+  final controller = Get.find<FavoriteController>();
 
   @override
   Widget build(BuildContext context) {
@@ -40,9 +38,7 @@ class FavoriteItemWidget extends StatelessWidget {
                     imagePath: favoriteItemModelObj.grandtown!.value,
                     height: 116.v,
                     width: 174.h,
-                    radius: BorderRadius.circular(
-                      12.h,
-                    ),
+                    radius: BorderRadius.circular(12.h),
                     alignment: Alignment.center,
                   ),
                 ),
@@ -111,10 +107,7 @@ class FavoriteItemWidget extends StatelessWidget {
                 textAlign: TextAlign.left,
               ),
               Padding(
-                padding: EdgeInsets.only(
-                  left: 45.h,
-                  top: 5.v,
-                ),
+                padding: EdgeInsets.only(left: 45.h, top: 5.v),
                 child: Obx(
                   () => CustomCheckboxButton(
                     text: "lbl_03".tr,
@@ -126,11 +119,7 @@ class FavoriteItemWidget extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.only(
-                  left: 8.h,
-                  top: 5.v,
-                  bottom: 2.v,
-                ),
+                padding: EdgeInsets.only(left: 8.h, top: 5.v, bottom: 2.v),
                 child: Obx(
                   () => CustomCheckboxButton(
                     text: "lbl_03".tr,

@@ -22,10 +22,8 @@ class MyPropertyController extends GetxController {
     if (currentUser == null) return;
 
     try {
-      // Clear the existing list before fetching new data
       myPropertyModelObj.value.bedroomlistItemList.value.clear();
 
-      // Fetch only properties posted by the current user
       final querySnapshot = await _firestore
           .collection('accommodations')
           .where('user_id', isEqualTo: currentUser.uid)
@@ -36,7 +34,7 @@ class MyPropertyController extends GetxController {
       }).toList();
 
       myPropertyModelObj.value.bedroomlistItemList.value = properties;
-      myPropertyModelObj.refresh(); // Ensure the list is updated in the UI
+      myPropertyModelObj.refresh();
     } catch (e) {
       print('Error fetching properties: $e');
     }
@@ -48,8 +46,8 @@ class MyPropertyController extends GetxController {
 
     try {
       // Delete the image from Firebase Storage
-      if (property.imageUrl != null && property.imageUrl!.isNotEmpty) {
-        final ref = FirebaseStorage.instance.refFromURL(property.imageUrl!);
+      if (property.imageUrls.isNotEmpty) {
+        final ref = FirebaseStorage.instance.refFromURL(property.imageUrls[0]);
         await ref.delete();
       }
 

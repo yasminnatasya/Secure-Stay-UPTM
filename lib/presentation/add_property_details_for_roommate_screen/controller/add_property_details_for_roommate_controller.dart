@@ -36,7 +36,7 @@ class AddPropertyDetailsForRoommateController extends GetxController {
   Rx<bool> vegetarian = false.obs;
   Rx<bool> nonsmoker = false.obs;
 
-  Rx<String?> selectedImagePath = Rx<String?>(null);
+  RxList<String?> selectedImagePaths = <String?>[].obs;
   final ImagePicker _imagePicker = ImagePicker();
   FirebaseAuth _auth = FirebaseAuth.instance;
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -83,8 +83,8 @@ class AddPropertyDetailsForRoommateController extends GetxController {
     vegetarian.value = false;
     nonsmoker.value = false;
 
-    // Clear selected image path and reset form stage
-    selectedImagePath.value = null;
+    // Clear selected image paths and reset form stage
+    selectedImagePaths.clear(); // Reset multiple images list
     currentFormStage.value = 1;
   }
 
@@ -98,14 +98,35 @@ class AddPropertyDetailsForRoommateController extends GetxController {
 
   Future<void> pickImage() async {
     try {
-      final pickedFile =
-          await _imagePicker.pickImage(source: ImageSource.gallery);
-      if (pickedFile != null) {
-        selectedImagePath.value = pickedFile.path;
+      final pickedFiles =
+          await _imagePicker.pickMultiImage(); // Allows multiple images
+      if (pickedFiles != null) {
+        selectedImagePaths.clear(); // Clear previous selections
+        selectedImagePaths.addAll(pickedFiles.map((file) => file.path));
       }
     } catch (e) {
-      print('Error picking image: $e');
-      Get.snackbar('Error', 'Failed to pick image');
+      print('Error picking images: $e');
+      Get.snackbar('Error', 'Failed to pick images');
+    }
+  }
+
+  Future<List<String?>> uploadImages(List<File> imageFiles) async {
+    List<String?> imageUrls = [];
+    try {
+      final userId = _auth.currentUser?.uid ?? '';
+      for (File imageFile in imageFiles) {
+        final storageRef = _storage.ref().child(
+            'accommodations/$userId/${DateTime.now().millisecondsSinceEpoch}.jpg');
+
+        final compressedImage = await compressImage(imageFile);
+        final uploadTask = await storageRef.putFile(compressedImage);
+        final imageUrl = await uploadTask.ref.getDownloadURL();
+        imageUrls.add(imageUrl);
+      }
+      return imageUrls;
+    } catch (e) {
+      Get.snackbar('Upload Failed', 'Failed to upload images');
+      return [];
     }
   }
 
@@ -135,47 +156,35 @@ class AddPropertyDetailsForRoommateController extends GetxController {
         return;
       }
 
-      // Check form stage and handle flow
       if (currentFormStage.value == 1) {
-        // Assume form stage 1 data is validated and ready to proceed
         currentFormStage.value = 2;
         return;
       } else if (currentFormStage.value == 2) {
-        // Only proceed to save when in the final stage
-        String? imageUrl;
-        if (selectedImagePath.value != null) {
-          final imageFile = File(selectedImagePath.value!);
-          imageUrl = await uploadImage(imageFile);
-          if (imageUrl == null) {
+        List<String?> imageUrls = [];
+        if (selectedImagePaths.isNotEmpty) {
+          final imageFiles =
+              selectedImagePaths.map((path) => File(path!)).toList();
+          imageUrls = await uploadImages(imageFiles);
+          if (imageUrls.isEmpty) {
             Get.snackbar('Error', 'Image upload failed, please try again');
             return;
           }
         }
 
-        // Prepare property data for Firestore
-        String title = fieldLableController.text.trim();
-        String description = placeholderController.text.trim();
-        String address = placeholderController.text.trim();
-        int beds = int.tryParse(bedController.text) ?? 0;
-        int baths = int.tryParse(bathsController.text) ?? 0;
-        int sqft = int.tryParse(sQFTController.text) ?? 0;
-        double monthlyRent = double.tryParse(monthlyRentController.text) ?? 0.0;
-        double deposit = double.tryParse(depositController.text) ?? 0.0;
-        String availableDate = dateController.text.trim();
-        String minimumStay = timeController.text.trim();
-
+        // Property data including multiple image URLs
         Map<String, dynamic> propertyData = {
           'user_id': currentUser.uid,
-          'title': title,
-          'description': description,
-          'address': address,
-          'beds': beds,
-          'baths': baths,
-          'sqft': sqft,
-          'monthly_rent': monthlyRent,
-          'deposit': deposit,
-          'available_date': availableDate,
-          'minimum_stay': minimumStay,
+          'title': fieldLableController.text.trim(),
+          'description': placeholderController.text
+              .trim(), // Correct input for description
+          'address': addressController.text.trim(), // Correct input for address
+          'beds': int.tryParse(bedController.text) ?? 0,
+          'baths': int.tryParse(bathsController.text) ?? 0,
+          'sqft': int.tryParse(sQFTController.text) ?? 0,
+          'monthly_rent': double.tryParse(monthlyRentController.text) ?? 0.0,
+          'deposit': double.tryParse(depositController.text) ?? 0.0,
+          'available_date': dateController.text.trim(),
+          'minimum_stay': timeController.text.trim(),
           'wifi': wifi.value,
           'elevator': elevator.value,
           'furniture': furniture.value,
@@ -186,14 +195,13 @@ class AddPropertyDetailsForRoommateController extends GetxController {
           'pet_lover': petLover.value,
           'vegetarian': vegetarian.value,
           'nonsmoker': nonsmoker.value,
-          'image_url': imageUrl, // Ensures image URL is added
+          'image_urls': imageUrls, // Store as a list of URLs
           'created_at': Timestamp.now(),
+          'is_available': true,
         };
 
-        // Save to Firestore
         await _firestore.collection('accommodations').add(propertyData);
         Get.to(() => Scaffold(body: PropertyAddSuccessDialog()));
-        // Reset form for new data entry
         resetForm();
       }
     } catch (e) {

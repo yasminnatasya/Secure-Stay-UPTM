@@ -1,6 +1,6 @@
 final Map<String, String> enUs = {
   // Splash screen Screen
-  "lbl_home_management": "UPTM Secure Stay",
+  "lbl_home_management": "SecureStay UPTM",
 
   // 01 Onboarding Screen Screen
   "msg_looking_for_a_place":
@@ -356,18 +356,18 @@ final Map<String, String> enUs = {
 
   // 08 Privacy policy Screen
   "msg_1_types_of_data": "1. Types of data we collect",
-  "msg_2_use_of_your_personal": "2. Use of your personal data ",
-  "msg_3_disclosure_of": "3.Disclosure of your personal data",
+  "msg_2_use_of_your_personal": "2. Use of your personal data",
+  "msg_3_disclosure_of": "3. Disclosure of your personal data",
   "msg_duis_tristique_diam":
-      "Duis tristique diam nunc. Sed at tincidunt orci. Mauris eget congue leo. Cras varius at ante vitae convallis. Duis semper magna nec tortor tincidunt, id tincidunt quam blandit. Vivamus vehicula dictum magna quis eleifend. Fusce ac odio ac nibh tempus euismod. Nullam bibendum velit et ex facilisis maximus. Donec vesed commodo. Vivamus sollicitudin risus quam",
+      "We collect various types of information, including your name, email address, and other data you provide when using our app.",
   "msg_maecenas_egestas":
-      " Maecenas egestas eu ligula sed commodo. Vivamus sollicitudin risus quam",
+      "We use your data to improve our services, provide personalized experiences, and communicate updates or changes.",
   "msg_sed_sollicitudin":
-      "Sed sollicitudin nisi mollis libero consectetur rutrum. Nam maximus mollis nisl quis facilisis. Integer fermentum commodo nibh. Ut mollis tincidunt hendrerit. Duis ipsum velit, maximus sed commodo imperdiet, dapibus id velit. Nullam in maximus enim. Pellentesque vulputate nisi sit amet lacus pulvinar finibus. Nullam sit amet enim id nibh volutpat gravida vitae in orci. Quisque nibh nisl, congue in ex a, ultricies ultrices metus. ",
+      "We may share your information with third parties as necessary to support app functionality, comply with legal obligations, or prevent harm.",
   "msg_sed_sollicitudin2":
-      "Sed sollicitudin nisi mollis libero consectetur rutrum. Nam maximus mollis nisl quis facilisis. Integer fermentum commodo nibh. Ut mollis tincidunt hendrerit. Duis ipsum velit, maximus sed commodo imperdiet, dapibus id velit. Nullam in maximus enim. Pellentesque vulputate nisi sit amet lacus pulvinar finibus. Nullam sit amet enim id nibh volutpat gravida vitae in orci. Quisque nibh nisl, congue in ex a, ultricies ultrices metus. Maecenas egestas eu ligula sed commodo. Vivamus sollicitudin risus quam Maecenas egestas eu ligula sed commodo. Vivamus sollicitudin risus quam",
+      "Your data may also be used to analyze trends, improve app performance, and enhance security measures.",
   "msg_sed_sollicitudin3":
-      "Sed sollicitudin nisi mollis libero consectetur rutrum. Nam maximus mollis nisl quis facilisis. Integer fermentum commodo nibh. Ut mollis tincidunt hendrerit. Duis ipsum velit, maximus sed commodo imperdiet, dapibus id velit. Nullam in maximus enim. Pellentesque vulputate nisi sit amet lacus pulvinar finibus. Nullam sit amet enim id nibh volutpat gravida vitae in orci. Quisque nibh nisl, congue in ex a, ultricies ultrices metus. Maecenas egestas eu ligula sed commodo. Vivamus sollicitudin risus quam",
+      "We employ security measures to protect your data from unauthorized access and ensure confidentiality. However, please note that no system is entirely secure.",
 
   // 09 Log out Screen
   "lbl_cancel": "Cancel",

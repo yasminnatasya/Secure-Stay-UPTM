@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:uptm_secure_stay/routes/app_routes.dart';
@@ -23,9 +24,15 @@ class SignUpController extends GetxController {
     configureEmailOtp();
   }
 
+  // Input Sanitization
+  String sanitizeInput(String input) {
+    // Remove any characters that are not alphanumeric, spaces, or standard symbols
+    return input.replaceAll(RegExp(r'[^\w\s@.-]'), '');
+  }
+
   void configureEmailOtp() {
     EmailOTP.config(
-      appName: 'UPTM Secure Stay',
+      appName: 'SecureStay UPTM',
       otpType: OTPType.numeric,
       emailTheme: EmailTheme.v1,
     );
@@ -52,15 +59,21 @@ class SignUpController extends GetxController {
     );
   }
 
+  bool isValidEmailDomain(String email) {
+    final allowedDomains = ['@gmail.com', '@uptm.edu.my'];
+    return allowedDomains.any((domain) => email.endsWith(domain));
+  }
+
   Future<void> signUp() async {
     try {
       if (isLoading.value) return;
       isLoading.value = true;
 
-      String email = emailController.text.trim();
-      String password = passwordController.text.trim();
-      String fullName = fullNameController.text.trim();
-      String studentId = studentIdController.text.trim();
+      // Sanitize inputs
+      String email = sanitizeInput(emailController.text.trim());
+      String password = sanitizeInput(passwordController.text.trim());
+      String fullName = sanitizeInput(fullNameController.text.trim());
+      String studentId = sanitizeInput(studentIdController.text.trim());
 
       if (email.isEmpty ||
           password.isEmpty ||
@@ -71,6 +84,47 @@ class SignUpController extends GetxController {
         return;
       }
 
+      if (!isValidEmailDomain(email)) {
+        Get.snackbar('Error', 'Please use a valid email domain');
+        isLoading.value = false;
+        return;
+      }
+
+      // Check if email already exists in the database
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+
+      if (userDoc.docs.isNotEmpty) {
+        final existingUser = userDoc.docs.first.data();
+        if (existingUser['is_verified'] == false) {
+          // Resend OTP and navigate to verification screen
+          bool isOtpSent = await EmailOTP.sendOTP(email: email);
+          if (!isOtpSent) {
+            Get.snackbar('Error', 'Failed to resend OTP to $email');
+            isLoading.value = false;
+            return;
+          }
+
+          Get.toNamed(AppRoutes.verificationScreen, arguments: {
+            'userId': userDoc.docs.first.id,
+            'fullName': fullName,
+            'email': email,
+            'studentId': studentId,
+          });
+          isLoading.value = false;
+          return;
+        } else {
+          // Email is already verified
+          Get.snackbar('Error', 'The email address is already in use.');
+          isLoading.value = false;
+          return;
+        }
+      }
+
+      // Proceed with account creation if email doesn't exist
       User? user;
       try {
         user = await _authService.createUserWithEmailAndPassword(
@@ -86,6 +140,16 @@ class SignUpController extends GetxController {
       }
 
       if (user != null) {
+        // Save user details with is_verified as false
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'email': email,
+          'fullName': fullName,
+          'studentId': studentId,
+          'is_verified': false,
+          'created_at': FieldValue.serverTimestamp(),
+        });
+
+        // Send OTP
         bool isOtpSent = await EmailOTP.sendOTP(email: email);
         if (!isOtpSent) {
           Get.snackbar('Error', 'Failed to send OTP to $email');
@@ -93,7 +157,6 @@ class SignUpController extends GetxController {
           return;
         }
 
-        // Pass all required data to VerificationScreen
         Get.toNamed(AppRoutes.verificationScreen, arguments: {
           'userId': user.uid,
           'fullName': fullName,

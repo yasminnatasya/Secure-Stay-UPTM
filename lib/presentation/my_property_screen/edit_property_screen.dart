@@ -16,6 +16,7 @@ class EditPropertyScreen extends StatefulWidget {
 
 class _EditPropertyScreenState extends State<EditPropertyScreen> {
   final _formKey = GlobalKey<FormState>();
+  late List<String> imageUrls;
 
   // Controllers for each field to populate and edit values
   late TextEditingController titleController;
@@ -82,7 +83,22 @@ class _EditPropertyScreenState extends State<EditPropertyScreen> {
     petLover = widget.property.petLover;
     vegetarian = widget.property.vegetarian;
     isAvailable = widget.property.isAvailable;
-    _imageUrl = widget.property.imageUrl;
+    imageUrls = widget.property.imageUrls;
+  }
+
+  // Method to pick and replace image at specific position
+  // Pick and replace image at a specific position
+  Future<void> _pickImageForPosition(int index) async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      final File imageFile = File(pickedFile.path);
+      final imageUrl =
+          await _uploadImage(imageFile, index); // Upload and get URL
+
+      setState(() {
+        imageUrls[index] = imageUrl; // Replace image URL in the array
+      });
+    }
   }
 
   Future<void> _pickImage() async {
@@ -94,26 +110,19 @@ class _EditPropertyScreenState extends State<EditPropertyScreen> {
     }
   }
 
-  Future<void> _uploadImage() async {
-    if (_imageFile == null) return;
-
+  // Upload image to Firebase Storage and return URL
+  Future<String> _uploadImage(File imageFile, int index) async {
     final fileName =
-        'accommodations/${widget.property.id}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+        'accommodations/${widget.property.id}/image_$index${DateTime.now().millisecondsSinceEpoch}.jpg';
     final ref = FirebaseStorage.instance.ref().child(fileName);
-    final uploadTask = ref.putFile(_imageFile!);
-
-    final snapshot = await uploadTask;
-    _imageUrl = await snapshot.ref.getDownloadURL();
+    final uploadTask = await ref.putFile(imageFile);
+    return await uploadTask.ref.getDownloadURL();
   }
 
+  // Save updated property including updated image array
   void _updateProperty() async {
     if (_formKey.currentState!.validate()) {
-      // Upload image if a new one is selected
-      if (_imageFile != null) {
-        await _uploadImage();
-      }
-
-      // Update Firestore document with new values
+      // Update Firestore document with new values and updated image URLs
       FirebaseFirestore.instance
           .collection('accommodations')
           .doc(widget.property.id)
@@ -139,10 +148,9 @@ class _EditPropertyScreenState extends State<EditPropertyScreen> {
         'pet_lover': petLover,
         'vegetarian': vegetarian,
         'is_available': isAvailable,
-        'image_url': _imageUrl,
+        'image_urls': imageUrls, // Update the Firestore image array
       }).then((_) {
-        // Navigate back after saving
-        Navigator.of(context).pop(true);
+        Navigator.of(context).pop(true); // Navigate back after saving
       });
     }
   }
@@ -174,33 +182,47 @@ class _EditPropertyScreenState extends State<EditPropertyScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              // Image Picker with Edit Icon
-              GestureDetector(
-                onTap: _pickImage,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    _imageFile == null && _imageUrl == null
-                        ? Container(
-                            height: 150,
+              // Display image list with edit option for each image
+              Text(
+                "Property Images",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: imageUrls.length,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () =>
+                        _pickImageForPosition(index), // Replace specific image
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          margin: EdgeInsets.only(bottom: 10),
+                          height: 150,
+                          decoration: BoxDecoration(
                             color: Colors.grey[300],
-                            child: Icon(Icons.add_a_photo, size: 50),
-                          )
-                        : _imageFile != null
-                            ? Image.file(_imageFile!,
-                                height: 150, fit: BoxFit.cover)
-                            : Image.network(_imageUrl!,
-                                height: 150, fit: BoxFit.cover),
-                    Positioned(
-                      bottom: 8,
-                      right: 8,
-                      child: CircleAvatar(
-                        backgroundColor: Colors.black54,
-                        child: Icon(Icons.edit, color: Colors.white),
-                      ),
+                            borderRadius: BorderRadius.circular(8),
+                            image: DecorationImage(
+                              image: NetworkImage(imageUrls[index]),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 8,
+                          right: 8,
+                          child: CircleAvatar(
+                            backgroundColor: Colors.black54,
+                            child: Icon(Icons.edit, color: Colors.white),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
               SizedBox(height: 16),
 

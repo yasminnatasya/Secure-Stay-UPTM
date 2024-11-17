@@ -1,16 +1,34 @@
-import '../../../core/app_export.dart';/// This class is used in the [favorite_item_widget] screen.
-class FavoriteItemModel {FavoriteItemModel({this.grandtown, this.shermanOaks, this.washington, this.three, this.three1, this.id, }) { grandtown = grandtown  ?? Rx(ImageConstant.imgRectangle17858);shermanOaks = shermanOaks  ?? Rx("Grand town");washington = washington  ?? Rx("4517 new york ave");three = three  ?? Rx(false);three1 = three1  ?? Rx(false);id = id  ?? Rx(""); }
+import 'package:get/get.dart';
+import '../../../core/app_export.dart';
 
-Rx<String>? grandtown;
+/// This class is used in the [favorite_item_widget] screen.
+class FavoriteItemModel {
+  FavoriteItemModel({
+    String? grandtown,
+    String? shermanOaks,
+    String? washington,
+    bool? three,
+    bool? three1,
+    String? id,
+    int? beds, // Add beds
+    int? baths, // Add baths
+  }) {
+    this.grandtown = (grandtown ?? ImageConstant.imgRectangle17858).obs;
+    this.shermanOaks = (shermanOaks ?? "Grand town").obs;
+    this.washington = (washington ?? "4517 new york ave").obs;
+    this.three = (three ?? false).obs;
+    this.three1 = (three1 ?? false).obs;
+    this.id = (id ?? "").obs;
+    this.beds = (beds ?? 0).obs; // Initialize beds
+    this.baths = (baths ?? 0).obs; // Initialize baths
+  }
 
-Rx<String>? shermanOaks;
-
-Rx<String>? washington;
-
-Rx<bool>? three;
-
-Rx<bool>? three1;
-
-Rx<String>? id;
-
- }
+  late RxString grandtown;
+  late RxString shermanOaks;
+  late RxString washington;
+  late RxBool three;
+  late RxBool three1;
+  late RxString id;
+  late RxInt beds; // Reactive beds field
+  late RxInt baths; // Reactive baths field
+}

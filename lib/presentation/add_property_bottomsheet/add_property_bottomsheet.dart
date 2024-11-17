@@ -49,101 +49,48 @@ class AddPropertyBottomSheet extends StatelessWidget {
                   ),
                   Padding(
                     padding: EdgeInsets.fromLTRB(16.h, 16.v, 16.h, 40.v),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              Get.back();
-                              Get.toNamed(AppRoutes.addPropertyHomeScreen);
-                            },
-                            child: Container(
-                              height: 129.v,
-                              alignment: Alignment.center,
-                              decoration: ShapeDecoration(
-                                color: Color(0xFFDAE9FF),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.h),
-                                ),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(11.h),
-                                    decoration: ShapeDecoration(
-                                      color: Colors.white,
-                                      shape: OvalBorder(),
-                                    ),
-                                    child: CustomImageView(
-                                      imagePath: ImageConstant.homeBlue,
-                                      height: 32.adaptSize,
-                                      width: 32.adaptSize,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 16.v,
-                                  ),
-                                  Text(
-                                    'Home',
-                                    textAlign: TextAlign.center,
-                                    style: theme.textTheme.bodyLarge!
-                                        .copyWith(fontWeight: FontWeight.w700),
-                                  ),
-                                ],
-                              ),
-                            ),
+                    child: GestureDetector(
+                      onTap: () {
+                        Get.back();
+                        Get.toNamed(
+                            AppRoutes.addPropertyDetailsForRoommateScreen);
+                      },
+                      child: Container(
+                        height: 129.v,
+                        alignment: Alignment.center,
+                        decoration: ShapeDecoration(
+                          color: Color(0xFFDBF3E7),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.h),
                           ),
                         ),
-                        SizedBox(
-                          width: 18.h,
-                        ),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              Get.back();
-                              Get.toNamed(AppRoutes
-                                  .addPropertyDetailsForRoommateScreen);
-                            },
-                            child: Container(
-                              height: 129.v,
-                              alignment: Alignment.center,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(11.h),
                               decoration: ShapeDecoration(
-                                color: Color(0xFFDBF3E7),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.h),
-                                ),
+                                color: Colors.white,
+                                shape: OvalBorder(),
                               ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(11.h),
-                                    decoration: ShapeDecoration(
-                                      color: Colors.white,
-                                      shape: OvalBorder(),
-                                    ),
-                                    child: CustomImageView(
-                                      imagePath: ImageConstant.friendsGreen,
-                                      height: 32.adaptSize,
-                                      width: 32.adaptSize,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 16.v,
-                                  ),
-                                  Text(
-                                    'Roommate',
-                                    textAlign: TextAlign.center,
-                                    style: theme.textTheme.bodyLarge!
-                                        .copyWith(fontWeight: FontWeight.w700),
-                                  ),
-                                ],
+                              child: CustomImageView(
+                                imagePath: ImageConstant.friendsGreen,
+                                height: 32.adaptSize,
+                                width: 32.adaptSize,
                               ),
                             ),
-                          ),
+                            SizedBox(
+                              height: 16.v,
+                            ),
+                            Text(
+                              'Roommate',
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.bodyLarge!
+                                  .copyWith(fontWeight: FontWeight.w700),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ],

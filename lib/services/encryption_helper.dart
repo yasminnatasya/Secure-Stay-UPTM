@@ -7,8 +7,12 @@ class EncryptionHelper {
   // Ensure the key is the correct length for AES
   static final Key _key =
       Key.fromUtf8(encryptionKey!.padRight(16).substring(0, 16));
-  static final IV _iv = IV.fromLength(16);
 
+  // Set a fixed 16-byte IV for AES encryption
+  static final IV _iv =
+      IV.fromUtf8('1234567890123456'); // Replace with your own 16-character IV
+
+  // Debugging function to print key and IV
   static void printKeyAndIV() {
     print('Encryption Key: ${_key.base16}');
     print('IV: ${_iv.base16}');

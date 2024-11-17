@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uptm_secure_stay/core/app_export.dart';
 import 'package:uptm_secure_stay/presentation/chat_details_screen/chat_details_screen.dart';
+import 'package:uptm_secure_stay/services/encryption_helper.dart';
+import 'package:intl/intl.dart';
 
 class ChatsScreen extends StatefulWidget {
   const ChatsScreen({super.key});
@@ -69,8 +71,12 @@ class _ChatsScreenState extends State<ChatsScreen> {
 
           final chatDocuments = snapshot.data!.docs;
 
-          return ListView.builder(
+          return ListView.separated(
             itemCount: chatDocuments.length,
+            separatorBuilder: (context, index) => Divider(
+              color: Colors.grey[300], // Line to split between chat items
+              thickness: 1.0,
+            ),
             itemBuilder: (context, index) {
               final chatData = chatDocuments[index];
               final chatId = chatData.id;
@@ -82,6 +88,26 @@ class _ChatsScreenState extends State<ChatsScreen> {
               );
 
               final lastMessage = chatData['lastMessage'] ?? "No message";
+              final lastMessageTimestamp = chatData['lastMessageTimestamp'];
+              final formattedTime = lastMessageTimestamp != null
+                  ? DateFormat('dd/MM/yyyy, hh:mm a')
+                      .format((lastMessageTimestamp as Timestamp).toDate())
+                  : "Unknown Time";
+
+              // Safely check for `propertyId`
+              final chatDataMap = chatData.data() as Map<String, dynamic>;
+              final propertyId = chatDataMap.containsKey('propertyId')
+                  ? chatDataMap['propertyId']
+                  : null;
+
+              // Adjust unreadCount logic
+              final unreadCount = chatDataMap.containsKey('unreadCount') &&
+                      chatDataMap['unreadCount'] is Map<String, dynamic> &&
+                      (chatDataMap['unreadCount'] as Map<String, dynamic>)
+                          .containsKey(currentUserId)
+                  ? (chatDataMap['unreadCount']
+                      as Map<String, dynamic>)[currentUserId]
+                  : 0;
 
               return FutureBuilder<DocumentSnapshot>(
                 future: FirebaseFirestore.instance
@@ -98,39 +124,73 @@ class _ChatsScreenState extends State<ChatsScreen> {
                   }
 
                   final userData = userSnapshot.data!;
-                  final userName = userData['name'] ?? 'Unknown';
+                  final encryptedName = userData['name'] ?? 'Unknown';
+                  final userName = encryptedName != 'Unknown'
+                      ? EncryptionHelper.decrypt(encryptedName)
+                      : 'Unknown';
 
-                  // Use a default icon if 'profileImage' field does not exist
-                  final userDataMap = userData.data() as Map<String, dynamic>?;
-                  final profileImage = userDataMap != null &&
-                          userDataMap.containsKey('profileImage')
+                  final userDataMap = userData.data()
+                      as Map<String, dynamic>; // Ensure it's a map
+                  final profileImage = userDataMap.containsKey('profileImage')
                       ? userDataMap['profileImage']
                       : null;
 
-                  // Cast chatData.data() to Map<String, dynamic> and check for 'propertyId'
-                  final chatDataMap = chatData.data() as Map<String, dynamic>?;
-                  final propertyId = chatDataMap != null &&
-                          chatDataMap.containsKey('propertyId')
-                      ? chatDataMap['propertyId']
-                      : null;
-
                   if (propertyId == null) {
-                    // If propertyId is missing, display a basic chat tile without property details
+                    // If propertyId is missing, display basic chat tile
                     return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: profileImage != null
-                            ? NetworkImage(profileImage)
-                            : null,
-                        child: profileImage == null ? Icon(Icons.person) : null,
+                      leading: Stack(
+                        children: [
+                          CircleAvatar(
+                            backgroundImage: profileImage != null
+                                ? NetworkImage(profileImage)
+                                : null,
+                            child: profileImage == null
+                                ? Icon(Icons.person, color: Colors.white)
+                                : null,
+                          ),
+                          if (unreadCount > 0)
+                            Positioned(
+                              right: 0,
+                              top: 0,
+                              child: CircleAvatar(
+                                radius: 10,
+                                backgroundColor: Colors.red,
+                                child: Text(
+                                  unreadCount.toString(),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                       title: Text(userName),
-                      subtitle: Text(lastMessage),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(lastMessage,
+                              maxLines: 1, overflow: TextOverflow.ellipsis),
+                          SizedBox(height: 4),
+                          Text(
+                            formattedTime,
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          ),
+                        ],
+                      ),
                       onTap: () {
+                        // Mark messages as read
+                        FirebaseFirestore.instance
+                            .collection('chats')
+                            .doc(chatId)
+                            .update({'unreadCount.$currentUserId': 0});
+
                         Get.to(
                           ChatDetailsScreen(
                             chatId: chatId,
                             ownerId: otherUserId,
-                            propertyDetails: {}, // Empty map since no property details
+                            propertyDetails: {}, // Empty map for missing property
                           ),
                         );
                       },
@@ -138,8 +198,6 @@ class _ChatsScreenState extends State<ChatsScreen> {
                   }
 
                   // Fetch property details if propertyId exists
-                  // Inside _buildChatsList() in ChatsScreen
-
                   return FutureBuilder<DocumentSnapshot>(
                     future: FirebaseFirestore.instance
                         .collection('accommodations')
@@ -153,26 +211,66 @@ class _ChatsScreenState extends State<ChatsScreen> {
 
                       final propertyData = propertySnapshot.data!;
                       final propertyDetails = {
-                        'propertyId':
-                            propertyId, // Ensure propertyId is always included
+                        'propertyId': propertyId,
                         'title': propertyData['title'] ?? 'No Name',
                         'address': propertyData['address'] ?? 'No Address',
                         'monthlyRent': propertyData['monthly_rent'] ?? 'N/A',
-                        'imageUrl': propertyData['image_url'] ??
-                            ImageConstant.imgEllipse22,
+                        'imageUrl': propertyData['image_urls'] != null &&
+                                (propertyData['image_urls'] as List).isNotEmpty
+                            ? propertyData['image_urls'][0]
+                            : null, // First image if available
                       };
 
                       return ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: profileImage != null
-                              ? NetworkImage(profileImage)
-                              : null,
-                          child:
-                              profileImage == null ? Icon(Icons.person) : null,
+                        leading: Stack(
+                          children: [
+                            CircleAvatar(
+                              backgroundImage: profileImage != null
+                                  ? NetworkImage(profileImage)
+                                  : null,
+                              child: profileImage == null
+                                  ? Icon(Icons.person, color: Colors.white)
+                                  : null,
+                            ),
+                            if (unreadCount > 0)
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                child: CircleAvatar(
+                                  radius: 10,
+                                  backgroundColor: Colors.red,
+                                  child: Text(
+                                    unreadCount.toString(),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                         title: Text(userName),
-                        subtitle: Text(lastMessage),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(lastMessage,
+                                maxLines: 1, overflow: TextOverflow.ellipsis),
+                            SizedBox(height: 4),
+                            Text(
+                              formattedTime,
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 12),
+                            ),
+                          ],
+                        ),
                         onTap: () {
+                          // Mark messages as read
+                          FirebaseFirestore.instance
+                              .collection('chats')
+                              .doc(chatId)
+                              .update({'unreadCount.$currentUserId': 0});
+
                           Get.to(
                             ChatDetailsScreen(
                               chatId: chatId,

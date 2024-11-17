@@ -12,25 +12,22 @@ class RecommendedForYouController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchAccommodations();
-  }
-
-  void fetchAccommodations() async {
-    try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('accommodations')
-          .where('is_available', isEqualTo: true)
-          .get();
-
+    // Start listening to the accommodations stream.
+    getAccommodationsStream().listen((snapshot) {
       List<RecommendedPropertyListItemModel> accommodations =
           snapshot.docs.map((doc) {
         var data = doc.data() as Map<String, dynamic>;
         bool isFavorited =
             (data['favorites'] as List<dynamic>?)?.contains(userId) ?? false;
 
+        // Check if 'image_urls' is a list and get the first image
+        List<dynamic>? imageUrls = data['image_urls'] as List<dynamic>?;
+        String firstImageUrl =
+            imageUrls != null && imageUrls.isNotEmpty ? imageUrls[0] : '';
+
         return RecommendedPropertyListItemModel(
           id: doc.id,
-          image: data['image_url'] ?? '',
+          image: firstImageUrl,
           name: data['title'] ?? 'No Title',
           address: data['address'] ?? 'No Address',
           price: "RM${data['monthly_rent'] ?? 'N/A'}/mo",
@@ -42,9 +39,14 @@ class RecommendedForYouController extends GetxController {
       }).toList();
 
       accommodationsList.assignAll(accommodations);
-    } catch (e) {
-      print("Failed to fetch accommodations: $e");
-    }
+    });
+  }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> getAccommodationsStream() {
+    return FirebaseFirestore.instance
+        .collection('accommodations')
+        .where('is_available', isEqualTo: true)
+        .snapshots();
   }
 
   void toggleFavorite(String propertyId) async {

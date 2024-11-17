@@ -9,15 +9,12 @@ import 'package:uptm_secure_stay/widgets/custom_image_view.dart';
 class RecommendedFormat extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? likeOnTap;
-
   final String image;
-  final Widget likeImage; // Change to Widget type
-
+  final Widget likeImage;
   final String name;
   final String address;
   final String price;
   final String type;
-
   final String? bed;
   final String? bathtub;
   final int? id;
@@ -26,7 +23,7 @@ class RecommendedFormat extends StatelessWidget {
     super.key,
     this.onTap,
     this.likeOnTap,
-    required this.likeImage, // Updated to be required
+    required this.likeImage,
     required this.image,
     required this.name,
     required this.address,
@@ -78,10 +75,7 @@ class RecommendedFormat extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(
-                      top: 8.v,
-                      right: 8.h,
-                    ),
+                    padding: EdgeInsets.only(top: 8.v, right: 8.h),
                     child: GestureDetector(
                       onTap: likeOnTap,
                       child: CustomIconButton(
@@ -90,7 +84,7 @@ class RecommendedFormat extends StatelessWidget {
                         decoration: IconButtonStyleHelper.outlineBlack,
                         padding: EdgeInsets.all(4.h),
                         alignment: Alignment.topRight,
-                        child: likeImage, // Use likeImage as a Widget
+                        child: likeImage,
                       ),
                     ),
                   ),
@@ -100,7 +94,6 @@ class RecommendedFormat extends StatelessWidget {
             Padding(
               padding: EdgeInsets.only(top: 8.h),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -124,6 +117,8 @@ class RecommendedFormat extends StatelessWidget {
                         padding: EdgeInsets.only(left: 4.h),
                         child: Text(
                           address,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: CustomTextStyles.bodySmallGray800,
                         ),
                       ),
@@ -155,9 +150,7 @@ class RecommendedFormat extends StatelessWidget {
                             height: 14.adaptSize,
                             width: 14.adaptSize,
                           ),
-                          SizedBox(
-                            width: 4.h,
-                          ),
+                          SizedBox(width: 4.h),
                           Text(bed ?? '-', style: theme.textTheme.bodySmall!),
                           CustomImageView(
                             imagePath: ImageConstant.bathtub,
@@ -165,9 +158,7 @@ class RecommendedFormat extends StatelessWidget {
                             width: 12.adaptSize,
                             margin: EdgeInsets.only(left: 8.h),
                           ),
-                          SizedBox(
-                            width: 4.h,
-                          ),
+                          SizedBox(width: 4.h),
                           Text(bathtub ?? '-',
                               style: theme.textTheme.bodySmall),
                         ],

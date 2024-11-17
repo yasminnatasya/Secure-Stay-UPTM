@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 import 'package:uptm_secure_stay/presentation/enter_location_screen/controller/enter_location_controller.dart';
 import 'package:uptm_secure_stay/presentation/home_screen_container_screen/controller/home_screen_container_controller.dart';
 import 'package:uptm_secure_stay/presentation/property_details_screen/property_details_screen.dart';
@@ -19,10 +20,12 @@ class _ExporePageState extends State<ExporePage> {
   late GoogleMapController _mapController;
   LatLng _initialPosition = const LatLng(3.1280, 101.7374);
   Set<Marker> _markers = {};
+  final Location _locationService = Location();
 
   @override
   void initState() {
     super.initState();
+    _checkLocationPermissionAndService();
     _setInitialLocation();
 
     // Retrieve the search query from HomeScreenContainerController
@@ -30,9 +33,71 @@ class _ExporePageState extends State<ExporePage> {
     String query = homeController.searchQuery.value;
     if (query.isNotEmpty) {
       enterLocationController.searchController.text = query;
-      enterLocationController
-          .searchAccommodations(query); // Trigger search directly
+      enterLocationController.searchAccommodations(
+          query, _updateMapBounds, _addSearchMarker);
+      // Trigger search directly
     }
+  }
+
+  Future<void> _checkLocationPermissionAndService() async {
+    bool serviceEnabled = await _locationService.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await _locationService.requestService();
+      if (!serviceEnabled) {
+        _showLocationServiceDialog();
+        return;
+      } else {
+        // Refresh the location after enabling service
+        _setInitialLocation();
+      }
+    }
+
+    PermissionStatus permissionGranted = await _locationService.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await _locationService.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        _showLocationPermissionDialog();
+      } else {
+        // Refresh the location after granting permission
+        _setInitialLocation();
+      }
+    } else if (permissionGranted == PermissionStatus.granted) {
+      // If permission was already granted, set initial location
+      _setInitialLocation();
+    }
+  }
+
+  void _showLocationServiceDialog() {
+    Get.defaultDialog(
+      title: "Enable Location Services",
+      content: Text(
+          "Location services are disabled. Please enable them to use this feature."),
+      onConfirm: () async {
+        bool enabled = await _locationService.requestService();
+        if (enabled) {
+          _setInitialLocation(); // Refresh the map immediately if service is enabled
+        }
+      },
+      onCancel: () => Navigator.of(context).pop(),
+      textConfirm: "Enable",
+      textCancel: "Cancel",
+    );
+  }
+
+  void _showLocationPermissionDialog() {
+    Get.defaultDialog(
+      title: "Location Permission Required",
+      content: Text("Please grant location permission to access this feature."),
+      onConfirm: () async {
+        PermissionStatus granted = await _locationService.requestPermission();
+        if (granted == PermissionStatus.granted) {
+          _setInitialLocation(); // Refresh the map immediately if permission is granted
+        }
+      },
+      onCancel: () => Navigator.of(context).pop(),
+      textConfirm: "Allow",
+      textCancel: "Deny",
+    );
   }
 
   // Future<BitmapDescriptor> _getCustomMarkerIcon() async {
@@ -73,7 +138,7 @@ class _ExporePageState extends State<ExporePage> {
                 onMapCreated: (controller) {
                   _mapController = controller;
                   enterLocationController
-                      .setMapController(controller); // Set the map controller
+                      .setMapController(controller); // Pass to the controller
                   _addMarkers();
                   _updateMapBounds();
                 },
@@ -96,7 +161,8 @@ class _ExporePageState extends State<ExporePage> {
                     return CustomSearchView(
                       onChanged: (p0) {},
                       onSubmit: (query) {
-                        enterLocationController.searchAccommodations(query);
+                        enterLocationController.searchAccommodations(
+                            query, _updateMapBounds, _addSearchMarker);
                       },
                       controller: enterLocationController.searchController,
                       hintText: "Search...",
@@ -321,7 +387,7 @@ class _ExporePageState extends State<ExporePage> {
   }
 
   void _addMarkers() async {
-    _markers.clear(); // Clear markers to avoid duplication
+    _markers.clear(); // Clear existing markers
 
     // Add UPTM Campus Marker
     _markers.add(
@@ -332,66 +398,63 @@ class _ExporePageState extends State<ExporePage> {
       ),
     );
 
-    // Add default markers for each accommodation
+    // Add markers for accommodations from Firestore via the controller
     for (var item in enterLocationController.accommodationsList) {
       _markers.add(
         Marker(
           markerId: MarkerId(item.id),
           position: LatLng(item.latitude, item.longitude),
-          // Use default Google Maps marker by removing the icon parameter
           infoWindow: InfoWindow(
             title: item.name,
-            snippet:
-                item.price, // Display the price as a snippet in the info window
+            snippet: item.price,
             onTap: () {
-              // Navigate to property details when info window is tapped
               Get.to(PropertyDetailsScreen(propertyId: item.id));
             },
           ),
           onTap: () {
-            // Show info window with price label when marker is tapped
             _mapController.showMarkerInfoWindow(MarkerId(item.id));
           },
         ),
       );
     }
-    setState(() {}); // Update the UI to reflect the new markers
+
+    setState(() {}); // Update the UI with the new markers
   }
 
   void _updateMapBounds() {
-    if (enterLocationController.currentPosition != null) {
-      LatLng currentLatLng = LatLng(
-        enterLocationController.currentPosition!.latitude,
-        enterLocationController.currentPosition!.longitude,
+    if (_markers.isNotEmpty) {
+      List<LatLng> allPositions =
+          _markers.map((marker) => marker.position).toList();
+
+      double southWestLat =
+          allPositions.map((p) => p.latitude).reduce((a, b) => a < b ? a : b);
+      double southWestLng =
+          allPositions.map((p) => p.longitude).reduce((a, b) => a < b ? a : b);
+      double northEastLat =
+          allPositions.map((p) => p.latitude).reduce((a, b) => a > b ? a : b);
+      double northEastLng =
+          allPositions.map((p) => p.longitude).reduce((a, b) => a > b ? a : b);
+
+      LatLngBounds bounds = LatLngBounds(
+        southwest: LatLng(southWestLat, southWestLng),
+        northeast: LatLng(northEastLat, northEastLng),
       );
 
-      if (_markers.isNotEmpty) {
-        List<LatLng> allPositions = [
-          currentLatLng,
-          enterLocationController.uptmCampusLocation,
-          ...enterLocationController.accommodationsList
-              .map((item) => LatLng(item.latitude, item.longitude))
-        ];
-
-        double southWestLat =
-            allPositions.map((p) => p.latitude).reduce((a, b) => a < b ? a : b);
-        double southWestLng = allPositions
-            .map((p) => p.longitude)
-            .reduce((a, b) => a < b ? a : b);
-        double northEastLat =
-            allPositions.map((p) => p.latitude).reduce((a, b) => a > b ? a : b);
-        double northEastLng = allPositions
-            .map((p) => p.longitude)
-            .reduce((a, b) => a > b ? a : b);
-        LatLngBounds bounds = LatLngBounds(
-          southwest: LatLng(southWestLat, southWestLng),
-          northeast: LatLng(northEastLat, northEastLng),
-        );
-
-        _mapController.animateCamera(
-          CameraUpdate.newLatLngBounds(bounds, 50),
-        );
-      }
+      _mapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
     }
+  }
+
+  void _addSearchMarker(LatLng position, String title) {
+    _markers.add(
+      Marker(
+        markerId: MarkerId('search_result'),
+        position: position,
+        infoWindow: InfoWindow(
+          title: title,
+          snippet: 'Searched Location',
+        ),
+      ),
+    );
+    setState(() {}); // Refresh the UI
   }
 }

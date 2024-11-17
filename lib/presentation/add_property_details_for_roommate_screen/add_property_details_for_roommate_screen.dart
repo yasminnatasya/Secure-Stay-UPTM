@@ -24,27 +24,16 @@ class _AddPropertyDetailsForRoommateScreenState
       addPropertyDetailsForRoommateController =
       Get.put(AddPropertyDetailsForRoommateController());
 
-  String selectCurrency = "USD";
-  List<String> currency = [
-    "USD",
-    "INR",
-    "EUR",
-    "GBP",
-    "AUD",
-  ];
-  String selectDeposit = "USD";
-  List<String> deposit = [
-    "USD",
-    "INR",
-    "EUR",
-    "GBP",
-    "AUD",
-  ];
+  String selectCurrency = "RM";
+  List<String> currency = ["RM"];
+  String selectDeposit = "RM";
+  List<String> deposit = ["RM"];
 
   String selectElectricBills = "Select";
   List<String> electricBills = [
-    "Dakshin gujrat vij company ltd",
+    "TNB",
   ];
+
   String selectWifi = "Select";
   List<String> wifiOther = [
     "Garden",
@@ -165,43 +154,51 @@ class _AddPropertyDetailsForRoommateScreenState
 
   /// Section Widget
   Widget _buildHeader() {
+    final AddPropertyDetailsForRoommateController controller =
+        Get.find<AddPropertyDetailsForRoommateController>();
+
     return Container(
-        padding: EdgeInsets.only(top: 18.v, bottom: 19.v),
-        decoration: AppDecoration.outlineGray10001,
-        child: CustomAppBar(
-            leadingWidth: 44.h,
-            leading: AppbarLeadingImage(
-                onTap: () {
-                  Get.back();
-                },
-                imagePath: ImageConstant.imgIcArrowLeft,
-                margin: EdgeInsets.only(left: 20.h, top: 2.v, bottom: 5.v)),
-            centerTitle: true,
-            title: AppbarSubtitle(text: "lbl_add_property".tr),
-            actions: [
-              AppbarSubtitleTwo(
-                  text: "1/3",
-                  margin: EdgeInsets.fromLTRB(16.h, 1.v, 16.h, 6.v))
-            ]));
+      padding: EdgeInsets.only(top: 18.v, bottom: 19.v),
+      decoration: AppDecoration.outlineGray10001,
+      child: CustomAppBar(
+        leadingWidth: 44.h,
+        leading: AppbarLeadingImage(
+          onTap: () {
+            Get.back();
+          },
+          imagePath: ImageConstant.imgIcArrowLeft,
+          margin: EdgeInsets.only(left: 20.h, top: 2.v, bottom: 5.v),
+        ),
+        centerTitle: true,
+        title: AppbarSubtitle(text: "lbl_add_property".tr),
+        actions: [
+          Obx(() => AppbarSubtitleTwo(
+                text:
+                    "${controller.currentFormStage.value}/3", // Update based on current form stage
+                margin: EdgeInsets.fromLTRB(16.h, 1.v, 16.h, 6.v),
+              )),
+        ],
+      ),
+    );
   }
 
   /// Section Widget for the image picker
   Widget _buildCover() {
     return GestureDetector(
       onTap: () async {
-        // Trigger image picking
         await addPropertyDetailsForRoommateController.pickImage();
-        setState(() {}); // Update the UI after picking an image
+        setState(() {}); // Update the UI after picking images
       },
       child: Obx(() {
-        // Check if an image has been selected
-        String? imagePath =
-            addPropertyDetailsForRoommateController.selectedImagePath.value;
+        // Check if images have been selected
+        List<String?> imagePaths =
+            addPropertyDetailsForRoommateController.selectedImagePaths;
         return Container(
           height: 196.v,
-          decoration: AppDecoration.white
-              .copyWith(borderRadius: BorderRadiusStyle.roundedBorder12),
-          child: imagePath == null
+          decoration: AppDecoration.white.copyWith(
+            borderRadius: BorderRadiusStyle.roundedBorder12,
+          ),
+          child: imagePaths.isEmpty
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -211,17 +208,26 @@ class _AddPropertyDetailsForRoommateScreenState
                         width: 40.adaptSize),
                     SizedBox(height: 12.v),
                     Text("lbl_add_cover_image".tr,
-                        style: CustomTextStyles.titleMediumSFProDisplayGray800)
+                        style: CustomTextStyles.titleMediumSFProDisplayGray800),
                   ],
                 )
-              : ClipRRect(
-                  borderRadius: BorderRadius.circular(12.v),
-                  child: Image.file(
-                    File(imagePath),
-                    width: double.infinity,
-                    height: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
+              : ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: imagePaths.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: EdgeInsets.only(right: 8.h),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12.v),
+                        child: Image.file(
+                          File(imagePaths[index]!),
+                          width: 180.h,
+                          height: 180.v,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    );
+                  },
                 ),
         );
       }),

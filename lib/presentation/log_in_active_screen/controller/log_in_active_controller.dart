@@ -9,22 +9,13 @@ class LogInActiveController extends GetxController {
   TextEditingController passwordFieldController = TextEditingController();
   Rx<LogInActiveModel> logInActiveModelObj = LogInActiveModel().obs;
   Rx<bool> isShowPassword = true.obs;
-  Rx<bool> isLoading = false.obs; // Track loading state
+  Rx<bool> isLoading = false.obs;
 
-  FirebaseAuth _auth = FirebaseAuth.instance; // Firebase Auth instance
+  FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Comment out this method to prevent disposing of controllers
-  // @override
-  // void onClose() {
-  //   super.onClose();
-  //   emailFieldController.dispose();
-  //   passwordFieldController.dispose();
-  // }
-
-  // Method for user login
   Future<void> loginUser() async {
     try {
-      isLoading.value = true; // Start loading
+      isLoading.value = true;
 
       String email = emailFieldController.text.trim();
       String password = passwordFieldController.text.trim();
@@ -35,38 +26,61 @@ class LogInActiveController extends GetxController {
         return;
       }
 
-      // Sign in with Firebase authentication
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // On successful login, navigate to the home screen
       if (userCredential.user != null) {
         print('Login successful, UID: ${userCredential.user!.uid}');
-
-        // Handle any potential non-fatal errors here and ignore them
-        try {
-          // If this is causing a type cast error, catch it and proceed
-          // Any operation that may cause the type cast error
-        } catch (error) {
-          print('Non-fatal error: $error'); // Log the error and proceed
-        }
-
-        isLoading.value = false; // Stop loading
+        isLoading.value = false;
         Get.toNamed(AppRoutes.homeScreenContainerScreen);
       }
-    } catch (e) {
-      // Log error to the terminal/console
-      print('Login Error: ${e.runtimeType} - ${e.toString()}');
+    } on FirebaseAuthException catch (e) {
+      isLoading.value = false;
 
-      isLoading.value = false; // Stop loading on error
-      Get.snackbar('Login Failed', 'Error: ${e.runtimeType} - ${e.toString()}',
-          snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red);
+      // Debug print to check exact error code
+      print('FirebaseAuthException code: ${e.code}');
+
+      String errorMessage;
+
+      switch (e.code) {
+        case 'invalid-email':
+          errorMessage = 'The email address is badly formatted.';
+          break;
+        case 'user-disabled':
+          errorMessage = 'This user has been disabled.';
+          break;
+        case 'user-not-found':
+          errorMessage = 'No user found for this email.';
+          break;
+        case 'wrong-password':
+        case 'invalid-credential': // Handle both cases as incorrect password
+          errorMessage = 'Incorrect password. Please try again.';
+          break;
+        default:
+          errorMessage = 'An unknown error occurred.';
+      }
+
+      Get.snackbar(
+        'Login Failed',
+        errorMessage,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      isLoading.value = false;
+      Get.snackbar(
+        'Login Failed',
+        'An error occurred. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
   }
 
-  // Method to toggle password visibility
   void togglePasswordVisibility() {
     isShowPassword.value = !isShowPassword.value;
   }

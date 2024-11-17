@@ -9,8 +9,7 @@ import 'package:uptm_secure_stay/widgets/custom_image_view.dart';
 class RecommendedEntryFormat extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? likeOnTap;
-  final Widget likeImage; // Change to Widget
-
+  final Widget likeImage;
   final String image;
   final String name;
   final String address;
@@ -22,7 +21,7 @@ class RecommendedEntryFormat extends StatelessWidget {
     super.key,
     this.onTap,
     this.likeOnTap,
-    required this.likeImage, // Updated to be required
+    required this.likeImage,
     required this.image,
     required this.name,
     required this.address,
@@ -63,10 +62,7 @@ class RecommendedEntryFormat extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(
-                      top: 8.v,
-                      right: 8.h,
-                    ),
+                    padding: EdgeInsets.only(top: 8.v, right: 8.h),
                     child: GestureDetector(
                       onTap: likeOnTap,
                       child: CustomIconButton(
@@ -75,7 +71,7 @@ class RecommendedEntryFormat extends StatelessWidget {
                         decoration: IconButtonStyleHelper.outlineBlack,
                         padding: EdgeInsets.all(4.h),
                         alignment: Alignment.topRight,
-                        child: likeImage, // Use likeImage as a Widget
+                        child: likeImage,
                       ),
                     ),
                   ),
@@ -85,7 +81,6 @@ class RecommendedEntryFormat extends StatelessWidget {
             Padding(
               padding: EdgeInsets.only(top: 8.h),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -112,6 +107,8 @@ class RecommendedEntryFormat extends StatelessWidget {
                         padding: EdgeInsets.only(left: 4.h),
                         child: Text(
                           address,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: CustomTextStyles.bodySmallGray800,
                         ),
                       ),

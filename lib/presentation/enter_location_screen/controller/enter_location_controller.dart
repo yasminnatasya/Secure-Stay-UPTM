@@ -16,6 +16,9 @@ class EnterLocationController extends GetxController {
   Position? currentPosition;
   GoogleMapController? mapController;
 
+  // Store the full list of accommodations here
+  List<LocationIdItemModel> _allAccommodations = [];
+
   // UPTM Campus Cheras coordinates
   final LatLng uptmCampusLocation = LatLng(3.1280, 101.7374);
 
@@ -57,30 +60,67 @@ class EnterLocationController extends GetxController {
     }
   }
 
-  void searchAccommodations(String query) {
+  void searchAccommodations(String query, Function updateMapBounds,
+      Function(LatLng, String) addMarkerCallback) async {
     if (query.isEmpty) {
-      // Reset to show all accommodations
-      fetchAccommodations(); // This should fetch all accommodations from Firebase
+      accommodationsList.assignAll(_allAccommodations);
+      updateMapBounds(); // Update bounds in the ExplorePage
       return;
     }
 
-    // Filter accommodations based on the query
-    var filteredList = accommodationsList
+    var filteredList = _allAccommodations
         .where((item) =>
             item.name.toLowerCase().contains(query.toLowerCase()) ||
             item.address.toLowerCase().contains(query.toLowerCase()))
         .toList();
 
-    // Update the list with the filtered results
     accommodationsList.assignAll(filteredList);
 
-    // If there are results, set the map to focus on them
     if (filteredList.isNotEmpty) {
       _zoomToAccommodation(filteredList.first);
+    } else {
+      await _searchGoogleMaps(
+          query, addMarkerCallback); // Pass the marker callback
     }
   }
 
-// Function to set mapController
+  Future<void> _searchGoogleMaps(
+      String query, Function(LatLng, String) addMarkerCallback) async {
+    try {
+      String url =
+          'https://maps.googleapis.com/maps/api/geocode/json?address=${Uri.encodeComponent(query)}&key=$apiKey';
+      http.Response response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        var jsonData = jsonDecode(response.body);
+        if (jsonData['status'] == 'OK' && jsonData['results'].isNotEmpty) {
+          var result = jsonData['results'][0];
+          double lat = result['geometry']['location']['lat'];
+          double lng = result['geometry']['location']['lng'];
+
+          // Animate the map to the searched location
+          if (mapController != null) {
+            mapController!.animateCamera(
+              CameraUpdate.newLatLngZoom(
+                  LatLng(lat, lng), 16), // Adjust zoom level
+            );
+          }
+
+          // Use the callback to add a marker
+          addMarkerCallback(LatLng(lat, lng), query);
+        } else {
+          Get.snackbar('No Results', 'No results found on Google Maps.');
+        }
+      } else {
+        Get.snackbar('Error', 'Failed to fetch results from Google Maps.');
+      }
+    } catch (e) {
+      print("Error during Google Maps search: $e");
+      Get.snackbar('Error', 'Failed to fetch results: $e');
+    }
+  }
+
+  // Function to set mapController
   void setMapController(GoogleMapController controller) {
     mapController = controller;
   }
@@ -107,13 +147,17 @@ class EnterLocationController extends GetxController {
       QuerySnapshot snapshot =
           await FirebaseFirestore.instance.collection('accommodations').get();
 
-      // Clear the list only once to avoid duplication
+      // Clear the lists only once to avoid duplication
       accommodationsList.clear();
+      _allAccommodations.clear();
 
       for (var doc in snapshot.docs) {
         var data = doc.data() as Map<String, dynamic>;
         String address = data['address'] ?? '';
-        String imageUrl = data['image_url'] ?? '';
+        // Check if the 'image_urls' field exists and is a list, then get the first image
+        List<dynamic>? imageUrls = data['image_urls'] as List<dynamic>?;
+        String firstImageUrl =
+            imageUrls != null && imageUrls.isNotEmpty ? imageUrls[0] : '';
         String title = data['title'] ?? 'No Title';
         double monthlyRent = data['monthly_rent'] != null
             ? data['monthly_rent'].toDouble()
@@ -159,11 +203,11 @@ class EnterLocationController extends GetxController {
 
         // Check if lat and lng are valid before adding to the set
         if (lat != null && lng != null) {
-          uniqueAccommodationsSet.add(LocationIdItemModel(
+          var accommodation = LocationIdItemModel(
             id: doc.id,
-            image: imageUrl,
+            image: firstImageUrl,
             name: title,
-            address: address, // Pass address here
+            address: address,
             price: '\RM$monthlyRent',
             type: '/mo',
             bed: '$beds',
@@ -173,14 +217,16 @@ class EnterLocationController extends GetxController {
             latitude: lat,
             longitude: lng,
             distance: distance,
-          ));
+          );
+          uniqueAccommodationsSet.add(accommodation);
         } else {
           print("Skipping accommodation due to missing coordinates: $title");
         }
       }
 
-      // Convert the set back to a list and update the accommodationsList
-      accommodationsList.assignAll(uniqueAccommodationsSet.toList());
+      // Convert the set back to a list
+      _allAccommodations = uniqueAccommodationsSet.toList();
+      accommodationsList.assignAll(_allAccommodations);
 
       print("Number of accommodations fetched: ${accommodationsList.length}");
       isLoading.value = false;

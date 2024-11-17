@@ -80,21 +80,21 @@ class _LogInActiveScreenState extends State<LogInActiveScreen> {
                           SizedBox(height: 30.v),
                           _buildLoginButton(),
                           SizedBox(height: 26.v),
-                          SizedBox(
-                            height: 24.v,
-                            child:
-                                Stack(alignment: Alignment.center, children: [
-                              Align(
-                                  alignment: Alignment.topCenter,
-                                  child: Padding(
-                                      padding: EdgeInsets.only(top: 11.v),
-                                      child: SizedBox(
-                                          width: 314.h, child: Divider()))),
-                              _buildOrContinueWithButton()
-                            ]),
-                          ),
+                          // SizedBox(
+                          //   height: 24.v,
+                          //   child:
+                          //       Stack(alignment: Alignment.center, children: [
+                          //     Align(
+                          //         alignment: Alignment.topCenter,
+                          //         child: Padding(
+                          //             padding: EdgeInsets.only(top: 11.v),
+                          //             child: SizedBox(
+                          //                 width: 314.h, child: Divider()))),
+                          //     // _buildOrContinueWithButton()
+                          //   ]),
+                          // ),
                           SizedBox(height: 26.v),
-                          _buildSocial(),
+                          // _buildSocial(),
                           SizedBox(height: 26.v),
                         ],
                       ),
@@ -176,42 +176,42 @@ class _LogInActiveScreenState extends State<LogInActiveScreen> {
         ));
   }
 
-  Widget _buildOrContinueWithButton() {
-    return CustomElevatedButton(
-        height: 24.v,
-        width: 128.h,
-        text: "msg_or_continue_with".tr,
-        buttonStyle: CustomButtonStyles.fillOnPrimaryContainer,
-        buttonTextStyle: CustomTextStyles.bodyLargeSFProDisplay,
-        alignment: Alignment.center);
-  }
+  // Widget _buildOrContinueWithButton() {
+  //   return CustomElevatedButton(
+  //       height: 24.v,
+  //       width: 128.h,
+  //       text: "msg_or_continue_with".tr,
+  //       buttonStyle: CustomButtonStyles.fillOnPrimaryContainer,
+  //       buttonTextStyle: CustomTextStyles.bodyLargeSFProDisplay,
+  //       alignment: Alignment.center);
+  // }
 
-  Widget _buildSocial() {
-    return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 8.h),
-        child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [_buildGoogleButton()]));
-  }
+  // Widget _buildSocial() {
+  //   return Padding(
+  //       padding: EdgeInsets.symmetric(horizontal: 8.h),
+  //       child: Row(
+  //           mainAxisAlignment: MainAxisAlignment.center,
+  //           children: [_buildGoogleButton()]));
+  // }
 
-  Widget _buildGoogleButton() {
-    return Expanded(
-        child: CustomElevatedButton(
-            height: 54.v,
-            text: "lbl_google".tr,
-            margin: EdgeInsets.only(right: 8.h),
-            leftIcon: Container(
-                margin: EdgeInsets.only(right: 12.h),
-                child: CustomImageView(
-                    imagePath: ImageConstant.imgIcGoogle,
-                    height: 24.adaptSize,
-                    width: 24.adaptSize)),
-            buttonStyle: CustomButtonStyles.fillGray,
-            buttonTextStyle: CustomTextStyles.titleMediumSFProDisplay16,
-            onPressed: () {
-              onTapGoogleButton();
-            }));
-  }
+  // Widget _buildGoogleButton() {
+  //   return Expanded(
+  //       child: CustomElevatedButton(
+  //           height: 54.v,
+  //           text: "lbl_google".tr,
+  //           margin: EdgeInsets.only(right: 8.h),
+  //           leftIcon: Container(
+  //               margin: EdgeInsets.only(right: 12.h),
+  //               child: CustomImageView(
+  //                   imagePath: ImageConstant.imgIcGoogle,
+  //                   height: 24.adaptSize,
+  //                   width: 24.adaptSize)),
+  //           buttonStyle: CustomButtonStyles.fillGray,
+  //           buttonTextStyle: CustomTextStyles.titleMediumSFProDisplay16,
+  //           onPressed: () {
+  //             onTapGoogleButton();
+  //           }));
+  // }
 
   onTapSignUpButton() {
     Get.toNamed(AppRoutes.signUpScreen);

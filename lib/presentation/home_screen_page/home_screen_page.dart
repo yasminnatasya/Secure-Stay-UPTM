@@ -34,6 +34,12 @@ class _HomeScreenPageState extends State<HomeScreenPage> {
       HomeScreenTabContainerController(HomeScreenTabContainerModel().obs));
 
   @override
+  void initState() {
+    super.initState();
+    homeScreenController.listenForNotifications(); // Start notifications here
+  }
+
+  @override
   Widget build(BuildContext context) {
     mediaQueryData = MediaQuery.of(context);
     return animationFunction(
@@ -141,33 +147,36 @@ class _HomeScreenPageState extends State<HomeScreenPage> {
 
   Widget cauroselSliderWidget() {
     return CarouselSlider.builder(
-        options: CarouselOptions(
-            height: 114.h,
-            initialPage: 0,
-            autoPlay: true,
-            viewportFraction: 1.0,
-            enableInfiniteScroll: false,
-            scrollDirection: Axis.horizontal,
-            onPageChanged: (index, reason) {}),
-        itemCount: 3,
-        itemBuilder: (context, index, realIndex) {
-          // SliderData model = controller.sliderData[index];
-          return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.h),
-            child: Container(
-              height: double.infinity,
-              width: double.infinity,
-              decoration: ShapeDecoration(
-                  color: const Color(0xFFF5E0FD),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.h),
-                  ),
-                  image: DecorationImage(
-                      image: AssetImage(
-                        ImageConstant.imgRectangle17853,
-                      ),
-                      fit: BoxFit.fill)),
-              child: Stack(children: [
+      options: CarouselOptions(
+        height: 114.h,
+        initialPage: 0,
+        autoPlay: true,
+        viewportFraction: 1.0,
+        enableInfiniteScroll: false,
+        scrollDirection: Axis.horizontal,
+        onPageChanged: (index, reason) {},
+      ),
+      itemCount: 3,
+      itemBuilder: (context, index, realIndex) {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.h),
+          child: Container(
+            height: double.infinity,
+            width: double.infinity,
+            decoration: ShapeDecoration(
+              color: const Color(0xFFF5E0FD),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.h),
+              ),
+              image: DecorationImage(
+                image: AssetImage(
+                  ImageConstant.imgRectangle17853,
+                ),
+                fit: BoxFit.fill,
+              ),
+            ),
+            child: Stack(
+              children: [
                 Container(
                   height: double.infinity,
                   width: double.infinity,
@@ -179,60 +188,54 @@ class _HomeScreenPageState extends State<HomeScreenPage> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.fromLTRB(24.h, 24.v, 16.h, 24.v),
+                  padding: EdgeInsets.fromLTRB(24.h, 24.v, 16.h,
+                      10.v), // Slightly increase bottom padding
                   child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          physics: NeverScrollableScrollPhysics(),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("lbl_get_15_off".tr,
-                                  style: CustomTextStyles
-                                      .titleLargeOnPrimaryContainer),
-                              SizedBox(height: 12.v),
-                              Text("msg_for_new_user_valid".tr,
-                                  style: CustomTextStyles
-                                      .bodyLargeOnPrimaryContainer)
-                            ]),
-                        GestureDetector(
-                          onTap: () {
-                            onTapProperty();
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 16.h,
-                              vertical: 8.v,
-                            ),
-                            decoration: ShapeDecoration(
-                              color: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(200),
+                              Text(
+                                "Find the Perfect Accommodation".tr,
+                                style: CustomTextStyles
+                                    .titleLargeOnPrimaryContainer,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                            child: Text(
-                              "lbl_book_now".tr,
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.bodyLarge!.copyWith(
-                                fontWeight: FontWeight.w700,
+                              SizedBox(height: 8.v),
+                              Text(
+                                "Explore options tailored for students, with amenities designed for comfortable and convenient living."
+                                    .tr,
+                                style: CustomTextStyles
+                                    .bodyLargeOnPrimaryContainer,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
+                            ],
                           ),
                         ),
-                      ]),
+                      ),
+                    ],
+                  ),
                 ),
-              ]),
+              ],
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 
-  /// Section Widget
   Widget _buildBedHorizontalScroll() {
     return GetBuilder<PopulrPropertyController>(
       init: Get.put(
-          PopulrPropertyController()), // Initialize here if not done globally
+          PopulrPropertyController()), // Initialize if not done globally
       builder: (controller) {
         if (controller.limitedPopularProperties.isEmpty) {
           return Center(child: Text("No properties available."));
@@ -249,9 +252,24 @@ class _HomeScreenPageState extends State<HomeScreenPage> {
                   controller.limitedPopularProperties.length,
                   (index) {
                     var property = controller.limitedPopularProperties[index];
+
+                    // Ensure property ID is not null or empty
+                    String propertyId = property.id?.toString() ?? '';
+
                     return GestureDetector(
                       onTap: () {
-                        onTapProperty();
+                        if (propertyId.isNotEmpty) {
+                          // Navigate to PropertyDetailsScreen with valid ID
+                          Get.to(PropertyDetailsScreen(propertyId: propertyId));
+                        } else {
+                          // Log or display error if propertyId is invalid
+                          print("Property ID is invalid or empty");
+                          Get.snackbar(
+                            "Error",
+                            "Unable to fetch property details. Please try again later.",
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                        }
                       },
                       child: Container(
                         height: 124.v,
@@ -419,8 +437,6 @@ class _HomeScreenPageState extends State<HomeScreenPage> {
     );
   }
 
-  // recommendedPropertyListItemList.length > 2
-  // ? 2
   //     : recommendedPropertyListItemList.length,
   /// Section Widget
   Widget _buildPropertyList() {
@@ -446,11 +462,17 @@ class _HomeScreenPageState extends State<HomeScreenPage> {
           var property = controller.accommodationsList[index];
           bool isFavourite = property.isFavourite;
 
+          // Truncate address to 10 characters with ellipsis if it’s too long
+          String truncatedAddress =
+              property.address != null && property.address!.length > 10
+                  ? "${property.address!.substring(0, 10)}..."
+                  : property.address ?? 'No Address';
+
           return property.type == "/entry"
               ? RecommendedEntryFormat(
                   image: property.image ?? '',
                   name: property.name ?? 'No Name',
-                  address: property.address ?? 'No Address',
+                  address: truncatedAddress, // Pass truncated address
                   price: property.price ?? 'N/A',
                   type: property.type ?? '',
                   onTap: () {
@@ -458,7 +480,6 @@ class _HomeScreenPageState extends State<HomeScreenPage> {
                         PropertyDetailsScreen(propertyId: property.id ?? ''));
                   },
                   likeOnTap: () {
-                    // Use controller method to toggle favorite status and update the UI
                     controller.toggleFavorite(property.id ?? '');
                   },
                   likeImage: SvgPicture.asset(
@@ -472,7 +493,7 @@ class _HomeScreenPageState extends State<HomeScreenPage> {
               : RecommendedFormat(
                   image: property.image ?? '',
                   name: property.name ?? 'No Name',
-                  address: property.address ?? 'No Address',
+                  address: truncatedAddress, // Pass truncated address
                   price: property.price ?? 'N/A',
                   type: property.type ?? '',
                   bed: property.bed ?? 'N/A',
@@ -482,7 +503,6 @@ class _HomeScreenPageState extends State<HomeScreenPage> {
                         PropertyDetailsScreen(propertyId: property.id ?? ''));
                   },
                   likeOnTap: () {
-                    // Use controller method to toggle favorite status and update the UI
                     controller.toggleFavorite(property.id ?? '');
                   },
                   likeImage: SvgPicture.asset(

@@ -29,7 +29,9 @@ class BedroomlistItemWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CustomImageView(
-              imagePath: bedroomlistItemModelObj.imageUrl,
+              imagePath: bedroomlistItemModelObj.imageUrls.isNotEmpty
+                  ? bedroomlistItemModelObj.imageUrls[0]
+                  : 'default_image_path', // Add a default path if needed
               height: 100.adaptSize,
               width: 100.adaptSize,
               radius: BorderRadius.circular(12.h),

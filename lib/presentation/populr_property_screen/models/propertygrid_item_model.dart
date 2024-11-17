@@ -1,22 +1,15 @@
-
 /// This class is used in the [propertygrid_item_widget] screen.
 
 class PopularPropertyListItemModel {
   String image;
-
   String name;
-
   String address;
-
   String price;
   String type;
-
   String? bed;
-
   String? bathtub;
-  bool isFavourite ;
-
-  int? id;
+  bool isFavourite;
+  String? id; // Change from int? to String?
 
   PopularPropertyListItemModel({
     required this.image,
@@ -27,6 +20,6 @@ class PopularPropertyListItemModel {
     required this.isFavourite,
     this.bed,
     this.bathtub,
-    this.id,
+    this.id, // Update type here
   });
 }

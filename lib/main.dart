@@ -4,9 +4,22 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'core/app_export.dart';
 import 'package:uptm_secure_stay/widgets/restart_widget.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+// Declare a global notification plugin
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize local notifications
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+  const InitializationSettings initializationSettings =
+      InitializationSettings(android: initializationSettingsAndroid);
+
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
   // Set device orientation
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
