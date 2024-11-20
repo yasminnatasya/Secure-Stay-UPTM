@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'controller/profile_controller.dart';
 import 'models/profile_model.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +14,11 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  ProfileController controller =
-      Get.put(ProfileController(ProfileModel(name: '', email: '').obs));
+  ProfileController controller = Get.put(
+      ProfileController(ProfileModel(name: '', email: '', studentId: '').obs));
+
+  bool isStudentIdVisible = false; // Visibility toggle state
+
   @override
   Widget build(BuildContext context) {
     mediaQueryData = MediaQuery.of(context);
@@ -34,14 +40,22 @@ class _ProfilePageState extends State<ProfilePage> {
                   width: 100.adaptSize,
                 ),
                 SizedBox(height: 16.v),
+                // Display Name
                 Text(profile.name,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.titleMedium),
                 SizedBox(height: 4.v),
+                // Display Email
                 Text(profile.email,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyLarge),
+                SizedBox(height: 4.v),
+                // Display Student ID Section
+                _buildStudentIdSection(profile),
                 SizedBox(height: 24.v),
+                // Add Privacy Control Section
+                _buildPrivacyControl(profile),
+                SizedBox(height: 16.v),
                 _buildProfileEditText1(),
                 SizedBox(height: 16.v),
                 _buildProfileEditText2(),
@@ -56,6 +70,88 @@ class _ProfilePageState extends State<ProfilePage> {
         }),
       ),
     );
+  }
+
+  Widget _buildStudentIdSection(ProfileModel profile) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "Student ID: ",
+          style: theme.textTheme.bodyLarge!.copyWith(
+            fontWeight: FontWeight.bold,
+            color: appTheme.gray800,
+          ),
+        ),
+        SizedBox(width: 8.h),
+        // Show or hide student ID
+        Text(
+          isStudentIdVisible ? profile.studentId : "**** **** ****",
+          style: theme.textTheme.bodyLarge,
+        ),
+        SizedBox(width: 8.h),
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              isStudentIdVisible = !isStudentIdVisible;
+            });
+          },
+          child: Icon(
+            isStudentIdVisible ? Icons.visibility_off : Icons.visibility,
+            color: appTheme.gray800,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPrivacyControl(ProfileModel profile) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.h),
+      child: Container(
+        height: 56.v,
+        padding: EdgeInsets.symmetric(horizontal: 16.h),
+        decoration: ShapeDecoration(
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Display Email on Property Details",
+              style: theme.textTheme.bodyLarge,
+            ),
+            Switch(
+              value: profile.displayEmail,
+              onChanged: (newValue) {
+                setState(() {
+                  profile.displayEmail = newValue;
+                });
+                updateEmailVisibility(newValue); // Save preference to Firestore
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void updateEmailVisibility(bool isVisible) async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser.uid)
+            .update({'displayEmail': isVisible});
+        print("Email visibility updated: $isVisible");
+      }
+    } catch (e) {
+      print("Failed to update email visibility: $e");
+    }
   }
 
   /// Section Widget
@@ -202,48 +298,48 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Section Widget
-  // Widget _buildProfileEditText4() {
-  //   return GestureDetector(
-  //     onTap: () {
-  //       Get.toNamed(AppRoutes.myCardsScreen);
-  //     },
-  //     child: Padding(
-  //       padding: EdgeInsets.symmetric(horizontal: 16.h),
-  //       child: Container(
-  //         height: 56.v,
-  //         padding: EdgeInsets.symmetric(horizontal: 16.h),
-  //         decoration: ShapeDecoration(
-  //           color: Colors.white,
-  //           shape: RoundedRectangleBorder(
-  //             borderRadius: BorderRadius.circular(12),
-  //           ),
-  //         ),
-  //         child: Row(
-  //           children: [
-  //             CustomImageView(
-  //               imagePath: ImageConstant.imgIcCard,
-  //               height: 24.adaptSize,
-  //               width: 24.adaptSize,
-  //             ),
-  //             SizedBox(
-  //               width: 16.h,
-  //             ),
-  //             Text(
-  //               'My cards',
-  //               style: theme.textTheme.bodyLarge,
-  //             ),
-  //             Spacer(),
-  //             CustomImageView(
-  //               imagePath: ImageConstant.imgIcArrowRight,
-  //               height: 20.adaptSize,
-  //               width: 20.adaptSize,
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
+// Widget _buildProfileEditText4() {
+//   return GestureDetector(
+//     onTap: () {
+//       Get.toNamed(AppRoutes.myCardsScreen);
+//     },
+//     child: Padding(
+//       padding: EdgeInsets.symmetric(horizontal: 16.h),
+//       child: Container(
+//         height: 56.v,
+//         padding: EdgeInsets.symmetric(horizontal: 16.h),
+//         decoration: ShapeDecoration(
+//           color: Colors.white,
+//           shape: RoundedRectangleBorder(
+//             borderRadius: BorderRadius.circular(12),
+//           ),
+//         ),
+//         child: Row(
+//           children: [
+//             CustomImageView(
+//               imagePath: ImageConstant.imgIcCard,
+//               height: 24.adaptSize,
+//               width: 24.adaptSize,
+//             ),
+//             SizedBox(
+//               width: 16.h,
+//             ),
+//             Text(
+//               'My cards',
+//               style: theme.textTheme.bodyLarge,
+//             ),
+//             Spacer(),
+//             CustomImageView(
+//               imagePath: ImageConstant.imgIcArrowRight,
+//               height: 20.adaptSize,
+//               width: 20.adaptSize,
+//             ),
+//           ],
+//         ),
+//       ),
+//     ),
+//   );
+// }
 
   /// Section Widget
   Widget _buildProfileEditText5() {

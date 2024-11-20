@@ -35,6 +35,7 @@ class HomeScreenController extends GetxController {
     _firestore
         .collection('notifications')
         .where('receiverId', isEqualTo: currentUserId)
+        .where('read', isEqualTo: false) // Only listen for unread notifications
         .snapshots()
         .listen((querySnapshot) {
       for (var docChange in querySnapshot.docChanges) {

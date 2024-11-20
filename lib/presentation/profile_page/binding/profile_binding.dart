@@ -12,6 +12,7 @@ class ProfileBinding extends Bindings {
           ProfileModel(
             name: '', // Provide a default value for name
             email: '', // Provide a default value for email
+            studentId: '',
           ).obs,
         ));
   }

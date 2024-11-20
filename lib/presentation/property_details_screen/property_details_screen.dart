@@ -7,6 +7,7 @@ import 'package:uptm_secure_stay/presentation/chat_details_screen/chat_details_s
 import 'package:uptm_secure_stay/presentation/property_details_screen/models/bedroomslist_item_model.dart';
 import 'package:uptm_secure_stay/presentation/property_details_screen/models/property_details_model.dart';
 import 'package:uptm_secure_stay/presentation/property_details_screen/widgets/bedroomslist_item_widget.dart';
+import 'package:uptm_secure_stay/services/encryption_helper.dart';
 import 'package:uptm_secure_stay/widgets/custom_elevated_button.dart';
 import 'package:uptm_secure_stay/widgets/custom_icon_button.dart';
 import 'package:expandable_text/expandable_text.dart';
@@ -41,34 +42,63 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
           .get();
 
       if (doc.exists) {
-        setState(() {
-          propertyData = doc.data();
+        propertyData = doc.data();
 
-          // Retrieve image URLs array
-          List<dynamic> imageUrls = propertyData?['image_urls'] ?? [];
-          propertyData?['image_urls'] = imageUrls;
+        // Fetch owner details
+        final ownerId = propertyData?['user_id'] ?? '';
+        if (ownerId.isNotEmpty) {
+          final ownerDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(ownerId)
+              .get();
 
-          // Update bedroomsListItemList based on Firestore data
-          bedroomsListItemList = [
-            BedRoomsListItemModel(
-              image: ImageConstant.imgGroup38134Black900,
-              tittle: "${propertyData?['beds'] ?? 'N/A'} Bedrooms",
-            ),
-            BedRoomsListItemModel(
-              image: ImageConstant.imgGroup38134,
-              tittle: "${propertyData?['baths'] ?? 'N/A'} Bathrooms",
-            ),
-            BedRoomsListItemModel(
-              image: ImageConstant.imgIcSquarefeetGray900,
-              tittle: "${propertyData?['sqft'] ?? 'N/A'} Square Feet",
-            ),
-          ];
-        });
-      } else {
-        print("No data found for propertyId: ${widget.propertyId}");
+          if (ownerDoc.exists) {
+            final ownerData = ownerDoc.data();
+
+            // Fetch and decrypt owner details
+            propertyData?['owner_name'] =
+                ownerData != null ? tryDecrypt(ownerData['name']) : 'Unknown';
+            propertyData?['owner_email'] =
+                ownerData != null ? tryDecrypt(ownerData['email']) : 'Unknown';
+
+            // Fetch displayEmail preference
+            propertyData?['displayEmail'] =
+                ownerData != null ? ownerData['displayEmail'] ?? true : true;
+          }
+        }
+
+        // Update facilities
+        bedroomsListItemList = [
+          BedRoomsListItemModel(
+            image: ImageConstant.imgGroup38134Black900,
+            tittle: "${propertyData?['beds'] ?? 'N/A'} Bedrooms",
+          ),
+          BedRoomsListItemModel(
+            image: ImageConstant.imgGroup38134,
+            tittle: "${propertyData?['baths'] ?? 'N/A'} Bathrooms",
+          ),
+          BedRoomsListItemModel(
+            image: ImageConstant.imgIcSquarefeetGray900,
+            tittle: "${propertyData?['sqft'] ?? 'N/A'} Square Feet",
+          ),
+        ];
       }
+
+      setState(() {});
     } catch (e) {
       print("Failed to fetch property details: $e");
+    }
+  }
+
+  String tryDecrypt(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Unknown';
+    }
+    try {
+      return EncryptionHelper.decrypt(value);
+    } catch (e) {
+      print("Decryption Error: $e");
+      return 'Decryption Failed';
     }
   }
 
@@ -134,6 +164,47 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                             ],
                           ),
                         ),
+                        SizedBox(height: 16.v),
+                        // Owner Details Section in PropertyDetailsScreen
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16.h),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Owner Details",
+                                style: theme.textTheme.titleMedium,
+                              ),
+                              SizedBox(height: 8.v),
+                              Row(
+                                children: [
+                                  Icon(Icons.person,
+                                      color: appTheme.gray800, size: 20),
+                                  SizedBox(width: 8.h),
+                                  Text(
+                                    propertyData?['owner_name'] ?? 'N/A',
+                                    style: theme.textTheme.bodyLarge,
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 4.v),
+                              if (propertyData?['displayEmail'] ==
+                                  true) // Check displayEmail flag
+                                Row(
+                                  children: [
+                                    Icon(Icons.email,
+                                        color: appTheme.gray800, size: 20),
+                                    SizedBox(width: 8.h),
+                                    Text(
+                                      propertyData?['owner_email'] ?? 'N/A',
+                                      style: theme.textTheme.bodyLarge,
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
+                        ),
+
                         SizedBox(height: 16.v),
                         SizedBox(
                           height: 100.v,
@@ -354,7 +425,10 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
 
   void onTapTxtViewAll() {
     Get.bottomSheet(
-        isDismissible: false, FacilitiesViewAll(), isScrollControlled: true);
+      FacilitiesViewAll(propertyData: propertyData ?? {}),
+      isDismissible: false,
+      isScrollControlled: true,
+    );
   }
 
   void onTapBookNow() {

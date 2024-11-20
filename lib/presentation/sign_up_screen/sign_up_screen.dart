@@ -70,6 +70,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       _buildStudentId(),
                       SizedBox(height: 16.v),
                       _buildMasterUsername2(),
+                      SizedBox(height: 16.v),
+                      _buildInternationalStudentToggle(), // Add toggle here
                       SizedBox(height: 30.v),
                       _buildSignUpButton(),
                       SizedBox(height: 94.v),
@@ -185,6 +187,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
         Text("Password", style: theme.textTheme.bodyLarge),
         SizedBox(height: 8.v),
         _buildPassword(),
+      ],
+    );
+  }
+
+  Widget _buildInternationalStudentToggle() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Are you an international student?",
+            style: theme.textTheme.bodyLarge),
+        SizedBox(height: 8.v),
+        Obx(() => Switch(
+              value: signUpController.isInternationalStudent.value,
+              onChanged: (value) {
+                signUpController.isInternationalStudent.value = value;
+              },
+            )),
       ],
     );
   }

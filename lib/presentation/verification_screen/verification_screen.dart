@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'controller/verification_controller.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'dart:async';
+import 'package:uptm_secure_stay/widgets/custom_elevated_button.dart';
 
 class VerificationScreen extends StatefulWidget {
   const VerificationScreen({super.key});
@@ -49,6 +50,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
     return '$minutes:$seconds';
   }
 
+// Replace this method in your OTP screen widget
   @override
   Widget build(BuildContext context) {
     final Map<String, dynamic>? userInfo = Get.arguments;
@@ -80,8 +82,10 @@ class _VerificationScreenState extends State<VerificationScreen> {
                       style: TextStyle(fontSize: 18),
                     ),
                     const SizedBox(height: 24),
-                    Text("Time remaining: $timerText",
-                        style: TextStyle(fontSize: 16, color: Colors.red)),
+                    Text(
+                      "Time remaining: $timerText",
+                      style: TextStyle(fontSize: 16, color: Colors.red),
+                    ),
                     const SizedBox(height: 24),
                     PinCodeTextField(
                       appContext: context,
@@ -104,26 +108,13 @@ class _VerificationScreenState extends State<VerificationScreen> {
                       },
                     ),
                     const SizedBox(height: 30),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          backgroundColor:
-                              Colors.blue, // Set button background to blue
-                          textStyle: const TextStyle(fontSize: 18),
-                        ),
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            verificationController.verifyOtp(userInfo);
-                          }
-                        },
-                        child: const Text(
-                          'Verify',
-                          style: TextStyle(
-                              color: Colors.white), // Set text color to white
-                        ),
-                      ),
+                    CustomElevatedButton(
+                      text: "Verify",
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          verificationController.verifyOtp(userInfo);
+                        }
+                      },
                     ),
                   ],
                 ),

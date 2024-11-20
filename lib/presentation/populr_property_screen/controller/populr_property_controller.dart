@@ -67,24 +67,39 @@ class PopulrPropertyController extends GetxController {
   Future<void> fetchLimitedPopularProperties() async {
     try {
       print("Fetching limited properties...");
+
+      // Fetch available accommodations
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('accommodations')
           .where('is_available', isEqualTo: true)
-          .limit(2)
+          .limit(10) // Increase the limit to filter more effectively
           .get();
 
       List<PopularPropertyListItemModel> properties = [];
-      print("Total limited documents fetched: ${snapshot.docs.length}");
+      print("Total documents fetched: ${snapshot.docs.length}");
+
+      // Define the popular keywords
+      List<String> popularKeywords = [
+        'taman shamelin perkasa',
+        'shamelin',
+        'sky residence',
+        'shamelin star'
+      ];
+
       for (var doc in snapshot.docs) {
         var data = doc.data() as Map<String, dynamic>;
-        String address = data['address'] ?? '';
+        String address = data['address']?.toLowerCase() ?? '';
         bool isAvailable = data['is_available'] ?? false;
 
         print("Document data: $data");
         print("Address: $address, isAvailable: $isAvailable");
 
-        if (address.toLowerCase().contains('shamelin') && isAvailable) {
-          print("Adding limited property: ${data['title']}");
+        // Check if the address contains any of the popular keywords
+        bool isPopular = popularKeywords
+            .any((keyword) => address.contains(keyword.toLowerCase()));
+
+        if (isPopular && isAvailable) {
+          print("Adding popular property: ${data['title']}");
 
           // Retrieve the first image from image_urls array
           List<dynamic>? imageUrls = data['image_urls'] as List<dynamic>?;
@@ -95,7 +110,7 @@ class PopulrPropertyController extends GetxController {
             id: doc.id, // Add the document ID
             image: firstImageUrl,
             name: data['title'] ?? 'No Title',
-            address: address,
+            address: data['address'] ?? 'No Address',
             price: '\RM${data['monthly_rent'] ?? 0}',
             type: '/mo',
             bed: '${data['beds'] ?? 'N/A'}',
@@ -104,6 +119,7 @@ class PopulrPropertyController extends GetxController {
           ));
         }
       }
+
       print(
           "Total properties added to limitedPopularProperties: ${properties.length}");
       limitedPopularProperties.assignAll(properties);

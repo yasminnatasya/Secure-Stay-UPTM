@@ -244,191 +244,186 @@ class _HomeScreenPageState extends State<HomeScreenPage> {
           scrollDirection: Axis.horizontal,
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.h),
-            child: Container(
-              color: Colors.transparent,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  controller.limitedPopularProperties.length,
-                  (index) {
-                    var property = controller.limitedPopularProperties[index];
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: List.generate(
+                controller.limitedPopularProperties.length,
+                (index) {
+                  var property = controller.limitedPopularProperties[index];
 
-                    // Ensure property ID is not null or empty
-                    String propertyId = property.id?.toString() ?? '';
+                  // Ensure property ID is not null or empty
+                  String propertyId = property.id?.toString() ?? '';
 
-                    return GestureDetector(
-                      onTap: () {
-                        if (propertyId.isNotEmpty) {
-                          // Navigate to PropertyDetailsScreen with valid ID
-                          Get.to(PropertyDetailsScreen(propertyId: propertyId));
-                        } else {
-                          // Log or display error if propertyId is invalid
-                          print("Property ID is invalid or empty");
-                          Get.snackbar(
-                            "Error",
-                            "Unable to fetch property details. Please try again later.",
-                            snackPosition: SnackPosition.BOTTOM,
-                          );
-                        }
-                      },
-                      child: Container(
-                        height: 124.v,
-                        width: 350.h,
-                        margin: EdgeInsets.only(right: 16.h),
-                        padding: EdgeInsets.all(12.h),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              blurStyle: BlurStyle.outer,
-                              color: Color(0x0D000000),
-                              offset: Offset(0, 4),
-                              blurRadius: 12,
-                            ),
-                          ],
-                          borderRadius: BorderRadius.circular(12.h),
-                        ),
-                        child: Row(
-                          children: [
-                            CustomImageView(
-                              imagePath: property.image,
-                              height: 100.adaptSize,
-                              width: 100.adaptSize,
-                              radius: BorderRadius.circular(12.h),
-                            ),
-                            SizedBox(width: 12.h),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.only(
-                                            top: 9.v, right: 9.h),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              property.name,
-                                              style: theme
-                                                  .textTheme.titleMedium!
-                                                  .copyWith(
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                            SizedBox(height: 9.v),
-                                            RichText(
-                                              text: TextSpan(
-                                                children: [
-                                                  TextSpan(
-                                                    text: property.price,
-                                                    style: theme
-                                                        .textTheme.titleSmall,
-                                                  ),
-                                                  TextSpan(
-                                                    text: property.type,
-                                                    style: CustomTextStyles
-                                                        .bodySmallGray80012,
-                                                  ),
-                                                ],
-                                              ),
-                                              textAlign: TextAlign.left,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      CustomIconButton(
-                                        height: 24.adaptSize,
-                                        width: 24.adaptSize,
-                                        padding: EdgeInsets.all(4.h),
-                                        decoration:
-                                            IconButtonStyleHelper.outlineBlack,
-                                        child: CustomImageView(
-                                          imagePath: property.isFavourite
-                                              ? ImageConstant.imgLikeGray900
-                                              : ImageConstant.imgLike,
-                                        ),
-                                        onTap: () {
-                                          // Toggle favorite status and update the UI
-                                          property.isFavourite =
-                                              !property.isFavourite;
-                                          controller.update();
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 12.v),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          CustomImageView(
-                                            imagePath: ImageConstant.bed,
-                                            height: 16.adaptSize,
-                                            width: 16.adaptSize,
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsets.only(left: 5.h),
-                                            child: Text(
-                                              property.bed!,
-                                              style: theme.textTheme.bodySmall,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(width: 20.h),
-                                      Row(
-                                        children: [
-                                          CustomImageView(
-                                            imagePath: ImageConstant.bathtub,
-                                            height: 16.adaptSize,
-                                            width: 16.adaptSize,
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsets.only(left: 5.h),
-                                            child: Text(
-                                              property.bathtub!,
-                                              style: theme.textTheme.bodySmall,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(width: 20.h),
-                                      Row(
-                                        children: [
-                                          CustomImageView(
-                                            imagePath: ImageConstant
-                                                .imgIcSquarefeetGray900,
-                                            height: 16.adaptSize,
-                                            width: 16.adaptSize,
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsets.only(left: 5.h),
-                                            child: Text("lbl_2468_sqft".tr,
-                                                style:
-                                                    theme.textTheme.bodySmall),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                  return GestureDetector(
+                    onTap: () {
+                      if (propertyId.isNotEmpty) {
+                        // Navigate to PropertyDetailsScreen with valid ID
+                        Get.to(PropertyDetailsScreen(propertyId: propertyId));
+                      } else {
+                        // Log or display error if propertyId is invalid
+                        print("Property ID is invalid or empty");
+                        Get.snackbar(
+                          "Error",
+                          "Unable to fetch property details. Please try again later.",
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
+                      }
+                    },
+                    child: Container(
+                      height: 124.v,
+                      width: 350.h,
+                      margin: EdgeInsets.only(right: 16.h),
+                      padding: EdgeInsets.all(12.h),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            blurStyle: BlurStyle.outer,
+                            color: Color(0x0D000000),
+                            offset: Offset(0, 4),
+                            blurRadius: 12,
+                          ),
+                        ],
+                        borderRadius: BorderRadius.circular(12.h),
                       ),
-                    );
-                  },
-                ),
+                      child: Row(
+                        children: [
+                          // Image Section
+                          CustomImageView(
+                            imagePath: property.image,
+                            height: 100.adaptSize,
+                            width: 100.adaptSize,
+                            radius: BorderRadius.circular(12.h),
+                          ),
+                          SizedBox(width: 12.h),
+                          // Property Details Section
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Title and Favorite Icon
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        property.name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.textTheme.titleMedium!
+                                            .copyWith(
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 8.h),
+                                    CustomIconButton(
+                                      height: 24.adaptSize,
+                                      width: 24.adaptSize,
+                                      padding: EdgeInsets.all(4.h),
+                                      decoration:
+                                          IconButtonStyleHelper.outlineBlack,
+                                      child: CustomImageView(
+                                        imagePath: property.isFavourite
+                                            ? ImageConstant.imgLikeGray900
+                                            : ImageConstant.imgLike,
+                                      ),
+                                      onTap: () {
+                                        // Toggle favorite status and update the UI
+                                        property.isFavourite =
+                                            !property.isFavourite;
+                                        controller.update();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 9.v),
+                                // Price and Type
+                                RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: property.price,
+                                        style: theme.textTheme.titleSmall,
+                                      ),
+                                      TextSpan(
+                                        text: property.type,
+                                        style:
+                                            CustomTextStyles.bodySmallGray80012,
+                                      ),
+                                    ],
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
+                                SizedBox(height: 12.v),
+                                // Bed, Bath, and Square Feet Info
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    // Bed Icon and Text
+                                    Row(
+                                      children: [
+                                        CustomImageView(
+                                          imagePath: ImageConstant.bed,
+                                          height: 16.adaptSize,
+                                          width: 16.adaptSize,
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.only(left: 5.h),
+                                          child: Text(
+                                            property.bed!,
+                                            style: theme.textTheme.bodySmall,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    // Bath Icon and Text
+                                    Row(
+                                      children: [
+                                        CustomImageView(
+                                          imagePath: ImageConstant.bathtub,
+                                          height: 16.adaptSize,
+                                          width: 16.adaptSize,
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.only(left: 5.h),
+                                          child: Text(
+                                            property.bathtub!,
+                                            style: theme.textTheme.bodySmall,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    // Square Feet Icon and Text
+                                    Row(
+                                      children: [
+                                        CustomImageView(
+                                          imagePath: ImageConstant
+                                              .imgIcSquarefeetGray900,
+                                          height: 16.adaptSize,
+                                          width: 16.adaptSize,
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.only(left: 5.h),
+                                          child: Text(
+                                            "lbl_2468_sqft".tr,
+                                            style: theme.textTheme.bodySmall,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),

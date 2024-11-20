@@ -44,36 +44,41 @@ class BedroomlistItemWidget extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: EdgeInsets.only(top: 5.v),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              bedroomlistItemModelObj.title,
-                              style: theme.textTheme.titleMedium,
-                            ),
-                            SizedBox(height: 8.v),
-                            Text(
-                              "RM${bedroomlistItemModelObj.monthlyRent}/mo",
-                              style: theme.textTheme.bodyMedium,
-                            ),
-                            SizedBox(height: 8.v),
-                            Text(
-                              "Deposit: RM${bedroomlistItemModelObj.deposit}",
-                              style: theme.textTheme.bodySmall,
-                            ),
-                            SizedBox(height: 8.v),
-                            Text(
-                              "Available from: ${bedroomlistItemModelObj.availableDate}",
-                              style: theme.textTheme.bodySmall,
-                            ),
-                            SizedBox(height: 8.v),
-                            Text(
-                              "Minimum stay: ${bedroomlistItemModelObj.minimumStay} months",
-                              style: theme.textTheme.bodySmall,
-                            ),
-                          ],
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 5.v),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                bedroomlistItemModelObj.title,
+                                maxLines: 1, // Restrict to one line
+                                overflow: TextOverflow
+                                    .ellipsis, // Truncate text with ellipsis
+                                style: theme.textTheme.titleMedium,
+                              ),
+                              SizedBox(height: 8.v),
+                              Text(
+                                "RM${bedroomlistItemModelObj.monthlyRent}/mo",
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                              SizedBox(height: 8.v),
+                              Text(
+                                "Deposit: RM${bedroomlistItemModelObj.deposit}",
+                                style: theme.textTheme.bodySmall,
+                              ),
+                              SizedBox(height: 8.v),
+                              Text(
+                                "Available from: ${bedroomlistItemModelObj.availableDate}",
+                                style: theme.textTheme.bodySmall,
+                              ),
+                              SizedBox(height: 8.v),
+                              Text(
+                                "Minimum stay: ${bedroomlistItemModelObj.minimumStay} months",
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       Padding(

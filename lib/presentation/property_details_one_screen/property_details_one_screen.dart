@@ -160,7 +160,7 @@ class _PropertyDetailsOneScreenState extends State<PropertyDetailsOneScreen> {
                         Text('Facilities', style: theme.textTheme.titleMedium),
                         GestureDetector(
                           onTap: () {
-                            onTapTxtViewAll();
+                            // onTapTxtViewAll();
                           },
                           child: Text('View all',
                               textAlign: TextAlign.right,
@@ -331,10 +331,13 @@ class _PropertyDetailsOneScreenState extends State<PropertyDetailsOneScreen> {
 /// Common widget
 
 /// Navigates to the facilitiesScreen when the action is triggered.
-onTapTxtViewAll() {
-  Get.bottomSheet(
-      isDismissible: false, FacilitiesViewAll(), isScrollControlled: true);
-}
+// void onTapTxtViewAll() {
+//   Get.bottomSheet(
+//     FacilitiesViewAll(propertyData: propertyData ?? {}),
+//     isDismissible: false,
+//     isScrollControlled: true,
+//   );
+// }
 
 /// Navigates to the bookingDetailsScreen when the action is triggered.
 onTapBookNow() {

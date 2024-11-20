@@ -1,5 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uptm_secure_stay/widgets/animation_widget.dart';
-
 import '../notifications_screen/widgets/dominosbuyone_item_widget.dart';
 import 'controller/notifications_controller.dart';
 import 'models/dominosbuyone_item_model.dart';
@@ -8,6 +8,7 @@ import 'package:uptm_secure_stay/core/app_export.dart';
 import 'package:uptm_secure_stay/widgets/app_bar/appbar_leading_image.dart';
 import 'package:uptm_secure_stay/widgets/app_bar/appbar_subtitle.dart';
 import 'package:uptm_secure_stay/widgets/app_bar/custom_app_bar.dart';
+import 'package:intl/intl.dart'; // Add this import at the top
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -19,6 +20,7 @@ class NotificationsScreen extends StatefulWidget {
 class _NotificationsScreenState extends State<NotificationsScreen> {
   NotificationsController notificationsController =
       Get.put(NotificationsController());
+
   @override
   Widget build(BuildContext context) {
     mediaQueryData = MediaQuery.of(context);
@@ -80,30 +82,47 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return Expanded(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.h, vertical: 24.v),
-        child: animationFunction(
-          0,
-          ListView.separated(
-            physics: BouncingScrollPhysics(),
-            shrinkWrap: true,
-            separatorBuilder: (
-              context,
-              index,
-            ) {
-              return SizedBox(
-                height: 16.v,
-              );
-            },
-            itemCount: dominosbuyoneItemList.length,
-            itemBuilder: (context, index) {
-              return DominosbuyoneItemWidget(
-                dominoSBuyOne: dominosbuyoneItemList[index].dominoSBuyOne,
-                buyGetFree: dominosbuyoneItemList[index].buyGetFree,
-                duration: dominosbuyoneItemList[index].duration,
-              );
-            },
-          ),
-        ),
+        child: Obx(() {
+          final notificationsList = notificationsController.notificationsList;
+          if (notificationsList.isEmpty) {
+            return Center(child: Text("No notifications available."));
+          }
+
+          return animationFunction(
+            0,
+            ListView.separated(
+              physics: BouncingScrollPhysics(),
+              shrinkWrap: true,
+              separatorBuilder: (
+                context,
+                index,
+              ) {
+                return SizedBox(
+                  height: 16.v,
+                );
+              },
+              itemCount: notificationsList.length,
+              itemBuilder: (context, index) {
+                final notification = notificationsList[index];
+                return DominosbuyoneItemWidget(
+                  dominoSBuyOne: notification['title'], // Decrypted title
+                  buyGetFree: notification['body'], // Body field
+                  duration: _formatTimestamp(notification['timestamp']),
+                  senderName:
+                      notification['senderName'], // Decrypted sender name
+                  receiverName:
+                      notification['receiverName'], // Decrypted receiver name
+                );
+              },
+            ),
+          );
+        }),
       ),
     );
+  }
+
+  String _formatTimestamp(Timestamp timestamp) {
+    final dateTime = timestamp.toDate();
+    return DateFormat('MMM d, yyyy, h:mm a').format(dateTime);
   }
 }

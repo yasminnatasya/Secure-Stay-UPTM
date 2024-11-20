@@ -42,14 +42,20 @@ class ProfileController extends GetxController {
               EncryptionHelper.decrypt(userData['name'] ?? '');
           String decryptedEmail =
               EncryptionHelper.decrypt(userData['email'] ?? '');
+          String decryptedStudentId =
+              EncryptionHelper.decrypt(userData['studentId'] ?? '');
+          bool displayEmail =
+              userData['displayEmail'] ?? true; // Default to true
 
           // Log decrypted values to confirm
           print("Decrypted Name: $decryptedName");
           print("Decrypted Email: $decryptedEmail");
+          print("Decrypted Student ID: $decryptedStudentId");
 
           // If decryption failed, the method returns 'Error decrypting data'
           if (decryptedName == 'Error decrypting data' ||
-              decryptedEmail == 'Error decrypting data') {
+              decryptedEmail == 'Error decrypting data' ||
+              decryptedStudentId == 'Error decrypting data') {
             print("Decryption failed for one or more fields.");
             return;
           }
@@ -58,11 +64,14 @@ class ProfileController extends GetxController {
           profileModelObj.value = ProfileModel(
             name: decryptedName,
             email: decryptedEmail,
+            studentId: decryptedStudentId,
+            displayEmail: displayEmail,
           );
 
           // Set TextEditingControllers with decrypted data
           profileEditText1Controller.text = decryptedName;
           profileEditText2Controller.text = decryptedEmail;
+          profileEditText3Controller.text = decryptedStudentId;
         }
       }
     } catch (e) {

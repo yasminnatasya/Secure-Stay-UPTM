@@ -88,6 +88,110 @@ class AddPropertyDetailsForRoommateController extends GetxController {
     currentFormStage.value = 1;
   }
 
+  bool detectAnomaly(Map<String, dynamic> propertyData) {
+    // Define thresholds
+    const int minBeds = 0;
+    const int maxBeds = 20;
+    const int minBaths = 0;
+    const int maxBaths = 20;
+    const int minSqft = 100;
+    const int maxSqft = 10000;
+    const double minRent = 100.0;
+    const double maxRent = 10000.0;
+
+    // Anomaly checks
+    if (propertyData['beds'] < minBeds || propertyData['beds'] > maxBeds) {
+      return true;
+    }
+    if (propertyData['baths'] < minBaths || propertyData['baths'] > maxBaths) {
+      return true;
+    }
+    if (propertyData['sqft'] < minSqft || propertyData['sqft'] > maxSqft) {
+      return true;
+    }
+    if (propertyData['monthly_rent'] < minRent ||
+        propertyData['monthly_rent'] > maxRent) {
+      return true;
+    }
+
+    return false; // No anomaly detected
+  }
+
+  bool _areAllFieldsFilled() {
+    print("Title: ${fieldLableController.text.trim()}");
+    print("Description: ${placeholderController.text.trim()}");
+    print("Address: ${addressController.text.trim()}");
+    print("Beds: ${bedController.text.trim()}");
+    print("Baths: ${bathsController.text.trim()}");
+    print("SQFT: ${sQFTController.text.trim()}");
+    print("Monthly Rent: ${monthlyRentController.text.trim()}");
+    print("Deposit: ${depositController.text.trim()}");
+    print("Available Date: ${dateController.text.trim()}");
+    print("Minimum Stay: ${timeController.text.trim()}");
+
+    return fieldLableController.text.trim().isNotEmpty &&
+        placeholderController.text.trim().isNotEmpty &&
+        addressController.text.trim().isNotEmpty &&
+        bedController.text.trim().isNotEmpty &&
+        bathsController.text.trim().isNotEmpty &&
+        sQFTController.text.trim().isNotEmpty &&
+        monthlyRentController.text.trim().isNotEmpty &&
+        depositController.text.trim().isNotEmpty &&
+        dateController.text.trim().isNotEmpty &&
+        timeController.text.trim().isNotEmpty;
+  }
+
+  bool _areStageOneFieldsFilled() {
+    return fieldLableController.text.trim().isNotEmpty &&
+        placeholderController.text.trim().isNotEmpty &&
+        addressController.text.trim().isNotEmpty &&
+        bedController.text.trim().isNotEmpty &&
+        bathsController.text.trim().isNotEmpty &&
+        sQFTController.text.trim().isNotEmpty &&
+        monthlyRentController.text.trim().isNotEmpty &&
+        depositController.text.trim().isNotEmpty;
+  }
+
+  bool _areStageTwoFieldsFilled() {
+    return dateController.text.trim().isNotEmpty &&
+        timeController.text.trim().isNotEmpty;
+  }
+
+  bool isValidImage(File file) {
+    final validExtensions = ['jpg', 'jpeg', 'png', 'bmp'];
+    final fileExtension = file.path.split('.').last.toLowerCase();
+
+    if (!validExtensions.contains(fileExtension)) {
+      print("Invalid file extension: $fileExtension");
+      return false;
+    }
+
+    try {
+      final mimeType = file.readAsBytesSync().take(4).toList();
+      const jpgMagicNumbers = [0xFF, 0xD8, 0xFF];
+      const pngMagicNumbers = [0x89, 0x50, 0x4E, 0x47];
+
+      if (mimeType.length >= jpgMagicNumbers.length &&
+          List.generate(jpgMagicNumbers.length,
+                  (index) => mimeType[index] == jpgMagicNumbers[index])
+              .every((match) => match)) {
+        return true;
+      }
+
+      if (mimeType.length >= pngMagicNumbers.length &&
+          List.generate(pngMagicNumbers.length,
+                  (index) => mimeType[index] == pngMagicNumbers[index])
+              .every((match) => match)) {
+        return true;
+      }
+    } catch (e) {
+      print("Error validating image file: $e");
+      return false;
+    }
+
+    return false;
+  }
+
   Future<File> compressImage(File file) async {
     final image = img.decodeImage(file.readAsBytesSync());
     final compressedImage =
@@ -115,6 +219,11 @@ class AddPropertyDetailsForRoommateController extends GetxController {
     try {
       final userId = _auth.currentUser?.uid ?? '';
       for (File imageFile in imageFiles) {
+        if (!isValidImage(imageFile)) {
+          Get.snackbar('Error', 'Invalid image file detected. Please retry.');
+          continue;
+        }
+
         final storageRef = _storage.ref().child(
             'accommodations/$userId/${DateTime.now().millisecondsSinceEpoch}.jpg');
 
@@ -156,28 +265,58 @@ class AddPropertyDetailsForRoommateController extends GetxController {
         return;
       }
 
+      // Validate fields based on the current stage
       if (currentFormStage.value == 1) {
+        if (!_areStageOneFieldsFilled()) {
+          Get.snackbar(
+            'Error',
+            'All required fields for Stage 1 must be filled. Please check your input.',
+          );
+          return;
+        }
+
+        // Proceed to the next form stage
         currentFormStage.value = 2;
         return;
       } else if (currentFormStage.value == 2) {
-        List<String?> imageUrls = [];
-        if (selectedImagePaths.isNotEmpty) {
-          final imageFiles =
-              selectedImagePaths.map((path) => File(path!)).toList();
-          imageUrls = await uploadImages(imageFiles);
-          if (imageUrls.isEmpty) {
-            Get.snackbar('Error', 'Image upload failed, please try again');
-            return;
-          }
+        if (!_areStageTwoFieldsFilled()) {
+          Get.snackbar(
+            'Error',
+            'All required fields for Stage 2 must be filled. Please check your input.',
+          );
+          return;
         }
 
-        // Property data including multiple image URLs
+        // Validate and filter images
+        List<File> validImageFiles = [];
+        if (selectedImagePaths.isNotEmpty) {
+          validImageFiles = selectedImagePaths
+              .map((path) => File(path!))
+              .where((file) => isValidImage(file))
+              .toList();
+
+          if (validImageFiles.isEmpty) {
+            Get.snackbar('Error', 'Please upload valid image files only.');
+            return;
+          }
+        } else {
+          Get.snackbar('Error', 'At least one image is required.');
+          return;
+        }
+
+        // Upload images
+        List<String?> imageUrls = await uploadImages(validImageFiles);
+        if (imageUrls.isEmpty) {
+          Get.snackbar('Error', 'Image upload failed, please try again.');
+          return;
+        }
+
+        // Property data
         Map<String, dynamic> propertyData = {
           'user_id': currentUser.uid,
           'title': fieldLableController.text.trim(),
-          'description': placeholderController.text
-              .trim(), // Correct input for description
-          'address': addressController.text.trim(), // Correct input for address
+          'description': placeholderController.text.trim(),
+          'address': addressController.text.trim(),
           'beds': int.tryParse(bedController.text) ?? 0,
           'baths': int.tryParse(bathsController.text) ?? 0,
           'sqft': int.tryParse(sQFTController.text) ?? 0,
@@ -195,11 +334,21 @@ class AddPropertyDetailsForRoommateController extends GetxController {
           'pet_lover': petLover.value,
           'vegetarian': vegetarian.value,
           'nonsmoker': nonsmoker.value,
-          'image_urls': imageUrls, // Store as a list of URLs
+          'image_urls': imageUrls,
           'created_at': Timestamp.now(),
           'is_available': true,
         };
 
+        // Anomaly detection
+        if (detectAnomaly(propertyData)) {
+          Get.snackbar(
+            'Warning',
+            'Anomaly detected in the property details. Please review your input.',
+          );
+          return;
+        }
+
+        // Save property details to Firestore
         await _firestore.collection('accommodations').add(propertyData);
         Get.to(() => Scaffold(body: PropertyAddSuccessDialog()));
         resetForm();

@@ -117,32 +117,43 @@ class _LogInActiveScreenState extends State<LogInActiveScreen> {
   }
 
   Widget _buildPasswordField() {
-    return Obx(() => CustomTextFormField(
-          controller: logInActiveController.passwordFieldController,
-          hintText: "Enter your password",
-          textInputAction: TextInputAction.done,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return "Please enter a valid password";
-            }
-            return null;
-          },
-          suffix: GestureDetector(
-            onTap: () {
-              logInActiveController.togglePasswordVisibility();
-            },
-            child: Container(
-              margin: EdgeInsets.fromLTRB(30.h, 15.v, 16.h, 15.v),
-              child: CustomImageView(
-                  imagePath: logInActiveController.isShowPassword.value
-                      ? ImageConstant.imgIcEye
-                      : ImageConstant.imgEye,
-                  height: 24.adaptSize,
-                  width: 24.adaptSize),
+    return Obx(() => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CustomTextFormField(
+              controller: logInActiveController.passwordFieldController,
+              hintText: "Enter your password",
+              textInputAction: TextInputAction.done,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Please enter a valid password";
+                }
+                return null;
+              },
+              suffix: GestureDetector(
+                onTap: () {
+                  logInActiveController.togglePasswordVisibility();
+                },
+                child: Container(
+                  margin: EdgeInsets.fromLTRB(30.h, 15.v, 16.h, 15.v),
+                  child: CustomImageView(
+                      imagePath: logInActiveController.isShowPassword.value
+                          ? ImageConstant.imgIcEye
+                          : ImageConstant.imgEye,
+                      height: 24.adaptSize,
+                      width: 24.adaptSize),
+                ),
+              ),
+              suffixConstraints: BoxConstraints(maxHeight: 54.v),
+              obscureText: logInActiveController.isShowPassword.value,
             ),
-          ),
-          suffixConstraints: BoxConstraints(maxHeight: 54.v),
-          obscureText: logInActiveController.isShowPassword.value,
+            SizedBox(height: 8.v),
+            if (logInActiveController.errorMessage.value.isNotEmpty)
+              Text(
+                logInActiveController.errorMessage.value,
+                style: TextStyle(color: Colors.red, fontSize: 14),
+              ),
+          ],
         ));
   }
 
@@ -163,17 +174,32 @@ class _LogInActiveScreenState extends State<LogInActiveScreen> {
   }
 
   Widget _buildLoginButton() {
-    return Obx(() => CustomElevatedButton(
-          text: logInActiveController.isLoading.value
-              ? "Logging in..."
-              : "Log In",
-          onPressed: () {
-            if (_formKey.currentState!.validate() &&
-                !logInActiveController.isLoading.value) {
-              logInActiveController.loginUser(); // Call the login function
-            }
-          },
-        ));
+    return Obx(() {
+      if (logInActiveController.remainingCooldown.value > Duration.zero) {
+        // Show cooldown timer
+        return Column(
+          children: [
+            Text(
+              'Login disabled. Try again in ${logInActiveController.remainingCooldown.value.inMinutes}m ${logInActiveController.remainingCooldown.value.inSeconds % 60}s',
+              style: TextStyle(color: Colors.red, fontSize: 16),
+            ),
+            SizedBox(height: 10),
+          ],
+        );
+      }
+
+      // Show login button if no cooldown
+      return CustomElevatedButton(
+        text:
+            logInActiveController.isLoading.value ? "Logging in..." : "Log In",
+        onPressed: () {
+          if (_formKey.currentState!.validate() &&
+              !logInActiveController.isLoading.value) {
+            logInActiveController.loginUser(); // Call the login function
+          }
+        },
+      );
+    });
   }
 
   // Widget _buildOrContinueWithButton() {

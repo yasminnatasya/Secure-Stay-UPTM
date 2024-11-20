@@ -7,12 +7,17 @@ class DominosbuyoneItemWidget extends StatelessWidget {
   String dominoSBuyOne;
   String buyGetFree;
   String duration;
-  DominosbuyoneItemWidget(
-      {Key? key,
-      required this.dominoSBuyOne,
-      required this.buyGetFree,
-      required this.duration})
-      : super(
+  final String? senderName; // Optional sender name
+  final String? receiverName; // Optional receiver name
+
+  DominosbuyoneItemWidget({
+    Key? key,
+    required this.dominoSBuyOne,
+    required this.buyGetFree,
+    required this.duration,
+    this.senderName,
+    this.receiverName,
+  }) : super(
           key: key,
         );
 
@@ -52,6 +57,17 @@ class DominosbuyoneItemWidget extends StatelessWidget {
                     dominoSBuyOne,
                     style: theme.textTheme.titleLarge,
                   ),
+                  SizedBox(height: 5.v),
+                  if (senderName != null)
+                    Text(
+                      'From: $senderName',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  if (receiverName != null)
+                    Text(
+                      'To: $receiverName',
+                      style: theme.textTheme.bodySmall,
+                    ),
                   SizedBox(height: 10.v),
                   SizedBox(
                     width: 258.h,

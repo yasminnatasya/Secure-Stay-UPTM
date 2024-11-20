@@ -91,12 +91,22 @@ class _EditPropertyScreenState extends State<EditPropertyScreen> {
   Future<void> _pickImageForPosition(int index) async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
+      // Validate file extension as fallback for mimeType
+      final fileExtension = pickedFile.path.split('.').last.toLowerCase();
+      const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+
+      if (!allowedExtensions.contains(fileExtension)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please select a valid image file.')),
+        );
+        return;
+      }
+
       final File imageFile = File(pickedFile.path);
-      final imageUrl =
-          await _uploadImage(imageFile, index); // Upload and get URL
+      final imageUrl = await _uploadImage(imageFile, index);
 
       setState(() {
-        imageUrls[index] = imageUrl; // Replace image URL in the array
+        imageUrls[index] = imageUrl;
       });
     }
   }
@@ -104,6 +114,17 @@ class _EditPropertyScreenState extends State<EditPropertyScreen> {
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
+      // Validate file extension as fallback for mimeType
+      final fileExtension = pickedFile.path.split('.').last.toLowerCase();
+      const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+
+      if (!allowedExtensions.contains(fileExtension)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please select a valid image file.')),
+        );
+        return;
+      }
+
       setState(() {
         _imageFile = File(pickedFile.path);
       });
@@ -121,7 +142,7 @@ class _EditPropertyScreenState extends State<EditPropertyScreen> {
 
   // Save updated property including updated image array
   void _updateProperty() async {
-    if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState!.validate() && imageUrls.isNotEmpty) {
       // Update Firestore document with new values and updated image URLs
       FirebaseFirestore.instance
           .collection('accommodations')
@@ -152,6 +173,11 @@ class _EditPropertyScreenState extends State<EditPropertyScreen> {
       }).then((_) {
         Navigator.of(context).pop(true); // Navigate back after saving
       });
+    } else {
+      // Show error if form is invalid or images are missing
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please fill all fields and upload images.')),
+      );
     }
   }
 

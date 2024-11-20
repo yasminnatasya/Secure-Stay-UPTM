@@ -6,6 +6,7 @@ import 'package:uptm_secure_stay/routes/app_routes.dart';
 import 'package:uptm_secure_stay/services/auth_service.dart';
 import 'package:email_otp/email_otp.dart';
 import 'package:flutter/material.dart';
+import 'package:uptm_secure_stay/services/encryption_helper.dart';
 
 class SignUpController extends GetxController {
   TextEditingController fullNameController = TextEditingController();
@@ -15,6 +16,7 @@ class SignUpController extends GetxController {
 
   Rx<bool> isLoading = false.obs;
   Rx<bool> isShowPassword = true.obs;
+  Rx<bool> isInternationalStudent = false.obs;
 
   final AuthService _authService = AuthService();
 
@@ -22,12 +24,6 @@ class SignUpController extends GetxController {
   void onInit() {
     super.onInit();
     configureEmailOtp();
-  }
-
-  // Input Sanitization
-  String sanitizeInput(String input) {
-    // Remove any characters that are not alphanumeric, spaces, or standard symbols
-    return input.replaceAll(RegExp(r'[^\w\s@.-]'), '');
   }
 
   void configureEmailOtp() {
@@ -60,7 +56,7 @@ class SignUpController extends GetxController {
   }
 
   bool isValidEmailDomain(String email) {
-    final allowedDomains = ['@gmail.com', '@uptm.edu.my'];
+    final allowedDomains = ['@gmail.com', '@student.kuptm.edu.my'];
     return allowedDomains.any((domain) => email.endsWith(domain));
   }
 
@@ -69,11 +65,11 @@ class SignUpController extends GetxController {
       if (isLoading.value) return;
       isLoading.value = true;
 
-      // Sanitize inputs
-      String email = sanitizeInput(emailController.text.trim());
-      String password = sanitizeInput(passwordController.text.trim());
-      String fullName = sanitizeInput(fullNameController.text.trim());
-      String studentId = sanitizeInput(studentIdController.text.trim());
+      String email = emailController.text.trim();
+      String password = passwordController.text.trim();
+      String fullName = fullNameController.text.trim();
+      String studentId = studentIdController.text.trim();
+      bool isInternational = isInternationalStudent.value;
 
       if (email.isEmpty ||
           password.isEmpty ||
@@ -84,47 +80,14 @@ class SignUpController extends GetxController {
         return;
       }
 
+      // Validate email domain
       if (!isValidEmailDomain(email)) {
-        Get.snackbar('Error', 'Please use a valid email domain');
+        Get.snackbar('Error',
+            'Invalid email domain. Use @gmail.com or @student.kuptm.edu.my');
         isLoading.value = false;
         return;
       }
 
-      // Check if email already exists in the database
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .where('email', isEqualTo: email)
-          .limit(1)
-          .get();
-
-      if (userDoc.docs.isNotEmpty) {
-        final existingUser = userDoc.docs.first.data();
-        if (existingUser['is_verified'] == false) {
-          // Resend OTP and navigate to verification screen
-          bool isOtpSent = await EmailOTP.sendOTP(email: email);
-          if (!isOtpSent) {
-            Get.snackbar('Error', 'Failed to resend OTP to $email');
-            isLoading.value = false;
-            return;
-          }
-
-          Get.toNamed(AppRoutes.verificationScreen, arguments: {
-            'userId': userDoc.docs.first.id,
-            'fullName': fullName,
-            'email': email,
-            'studentId': studentId,
-          });
-          isLoading.value = false;
-          return;
-        } else {
-          // Email is already verified
-          Get.snackbar('Error', 'The email address is already in use.');
-          isLoading.value = false;
-          return;
-        }
-      }
-
-      // Proceed with account creation if email doesn't exist
       User? user;
       try {
         user = await _authService.createUserWithEmailAndPassword(
@@ -140,16 +103,21 @@ class SignUpController extends GetxController {
       }
 
       if (user != null) {
-        // Save user details with is_verified as false
+        // Encrypt user data before saving
+        final encryptedEmail = EncryptionHelper.encrypt(email);
+        final encryptedFullName = EncryptionHelper.encrypt(fullName);
+        final encryptedStudentId = EncryptionHelper.encrypt(studentId);
+
+        // Save encrypted data to Firestore
         await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-          'email': email,
-          'fullName': fullName,
-          'studentId': studentId,
+          'email': encryptedEmail,
+          'name': encryptedFullName,
+          'studentId': encryptedStudentId,
           'is_verified': false,
-          'created_at': FieldValue.serverTimestamp(),
+          'is_international_student': isInternational, // Save flag
+          'created_at': Timestamp.now(),
         });
 
-        // Send OTP
         bool isOtpSent = await EmailOTP.sendOTP(email: email);
         if (!isOtpSent) {
           Get.snackbar('Error', 'Failed to send OTP to $email');
@@ -157,11 +125,12 @@ class SignUpController extends GetxController {
           return;
         }
 
+        // Pass encrypted data to VerificationScreen
         Get.toNamed(AppRoutes.verificationScreen, arguments: {
           'userId': user.uid,
-          'fullName': fullName,
-          'email': email,
-          'studentId': studentId,
+          'name': encryptedFullName,
+          'email': encryptedEmail,
+          'studentId': encryptedStudentId,
         });
       }
 
