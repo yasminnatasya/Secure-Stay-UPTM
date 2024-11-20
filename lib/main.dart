@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'core/app_export.dart';
 import 'package:uptm_secure_stay/widgets/restart_widget.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Declare a global notification plugin
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -35,22 +36,33 @@ Future<void> main() async {
   // Initialize Firebase
   await Firebase.initializeApp();
 
-  runApp(RestartWidget(child: MyApp()));
+  final prefs = await SharedPreferences.getInstance();
+  final showOnboarding = prefs.getBool('showOnboarding') ?? true;
+
+  runApp(RestartWidget(
+    child: MyApp(
+      showOnboarding: showOnboarding,
+    ),
+  ));
 }
 
 class MyApp extends StatelessWidget {
+  final bool showOnboarding;
+
+  MyApp({required this.showOnboarding});
+
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme: theme,
       translations: AppLocalization(),
-      locale: Get.deviceLocale, // for setting localization strings
+      locale: Get.deviceLocale,
       fallbackLocale: Locale('en', 'US'),
       title: 'uptm_securestay',
       initialBinding: InitialBindings(),
       initialRoute:
-          AppRoutes.initialRoute, // Set splash screen as initial route
+          AppRoutes.splashScreen, // Always start with the splash screen
       getPages: AppRoutes.pages,
     );
   }

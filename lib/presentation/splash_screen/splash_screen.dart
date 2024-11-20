@@ -1,6 +1,7 @@
 import 'controller/splash_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:uptm_secure_stay/core/app_export.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -25,6 +26,22 @@ class _SplashScreenState extends State<SplashScreen> {
           : Get.toNamed(AppRoutes.homeScreenContainerScreen);
     });
     super.initState();
+    _navigateToNextScreen();
+  }
+
+  Future<void> _navigateToNextScreen() async {
+    // Load SharedPreferences to check the onboarding flag
+    final prefs = await SharedPreferences.getInstance();
+    final showOnboarding = prefs.getBool('showOnboarding') ?? true;
+
+    // Simulate loading time
+    await Future.delayed(const Duration(milliseconds: 3000));
+
+    if (showOnboarding) {
+      Get.offNamed(AppRoutes.onboardingScreen); // Navigate to onboarding
+    } else {
+      Get.offNamed(AppRoutes.logInActiveScreen); // Navigate to login
+    }
   }
 
   void getCheck() async {

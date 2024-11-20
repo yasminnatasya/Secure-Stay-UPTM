@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:uptm_secure_stay/core/app_export.dart';
 import 'package:uptm_secure_stay/widgets/custom_elevated_button.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -111,25 +112,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     () => Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16.h),
                       child: CustomElevatedButton(
-                          text: onboardingController.sliderIndex.value == 2
-                              ? 'Get started'
-                              : 'Next',
-                          onPressed: onboardingController.sliderIndex.value ==
-                                  OnboardingModel.pages.length - 1
-                              ? () {
-                                  print('object');
-                                  Get.toNamed(AppRoutes.logInActiveScreen);
-                                }
-                              : () {
-                                  print('object11111');
-                                  pageController.nextPage(
-                                      duration:
-                                          const Duration(milliseconds: 200),
-                                      curve: Curves.easeIn);
-                                  SharedPreferencesClass s1 =
-                                      SharedPreferencesClass();
-                                  s1.setData(false, true);
-                                }),
+                        text: onboardingController.sliderIndex.value ==
+                                OnboardingModel.pages.length - 1
+                            ? 'Get started'
+                            : 'Next',
+                        onPressed: () async {
+                          if (onboardingController.sliderIndex.value ==
+                              OnboardingModel.pages.length - 1) {
+                            // Save in SharedPreferences that onboarding was completed
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.setBool('showOnboarding', false);
+
+                            // Navigate to login screen
+                            Get.offNamed(AppRoutes.logInActiveScreen);
+                          } else {
+                            pageController.nextPage(
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeIn,
+                            );
+                          }
+                        },
+                      ),
                     ),
                   ),
                   SizedBox(height: 16.v),
