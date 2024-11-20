@@ -280,6 +280,7 @@ class ChatDetailsController extends GetxController {
         'receiverId': receiverId,
         'timestamp': FieldValue.serverTimestamp(),
         'senderId': currentUserId,
+        'read': false, // Set read to false
       });
 
       // Clear the input field
