@@ -18,27 +18,38 @@ class MyPropertyController extends GetxController {
   }
 
   Future<void> fetchProperties() async {
-    final currentUser = _auth.currentUser;
-    if (currentUser == null) return;
+  final currentUser = _auth.currentUser;
+  if (currentUser == null) {
+    print('No user is logged in.');
+    return;
+  }
 
-    try {
-      myPropertyModelObj.value.bedroomlistItemList.value.clear();
+  try {
+    // Clear the current list to avoid displaying stale data
+    myPropertyModelObj.value.bedroomlistItemList.value.clear();
 
-      final querySnapshot = await _firestore
-          .collection('accommodations')
-          .where('user_id', isEqualTo: currentUser.uid)
-          .get();
+    // Fetch only properties where user_id matches the current user's UID
+    final querySnapshot = await _firestore
+        .collection('accommodations')
+        .where('user_id', isEqualTo: currentUser.uid)
+        .get();
 
+    if (querySnapshot.docs.isNotEmpty) {
       final properties = querySnapshot.docs.map((doc) {
         return BedroomlistItemModel.fromFirestore(doc);
       }).toList();
 
       myPropertyModelObj.value.bedroomlistItemList.value = properties;
-      myPropertyModelObj.refresh();
-    } catch (e) {
-      print('Error fetching properties: $e');
+    } else {
+      print('No properties found for user: ${currentUser.uid}');
     }
+
+    myPropertyModelObj.refresh();
+  } catch (e) {
+    print('Error fetching properties for user ${currentUser.uid}: $e');
   }
+}
+
 
   Future<void> deleteProperty(BedroomlistItemModel property) async {
     final currentUser = _auth.currentUser;

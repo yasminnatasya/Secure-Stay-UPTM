@@ -82,35 +82,40 @@ class _MyPropertyScreenState extends State<MyPropertyScreen> {
   }
 
   /// Section Widget
-  Widget _buildBedroomList() {
-    return Expanded(
-      child: Obx(
-        () => animationFunction(
-          0,
-          ListView.separated(
-            padding: EdgeInsets.symmetric(horizontal: 16.h, vertical: 24.v),
-            physics: BouncingScrollPhysics(),
-            shrinkWrap: true,
-            separatorBuilder: (context, index) => SizedBox(height: 16.v),
-            itemCount: myPropertyController
-                .myPropertyModelObj.value.bedroomlistItemList.value.length,
-            itemBuilder: (context, index) {
-              BedroomlistItemModel model = myPropertyController
-                  .myPropertyModelObj.value.bedroomlistItemList.value[index];
+Widget _buildBedroomList() {
+  return Expanded(
+    child: Obx(
+      () => animationFunction(
+        0,
+        ListView.separated(
+          padding: EdgeInsets.symmetric(horizontal: 16.h, vertical: 24.v),
+          physics: BouncingScrollPhysics(),
+          shrinkWrap: true,
+          separatorBuilder: (context, index) => SizedBox(height: 16.v),
+          itemCount: myPropertyController
+              .myPropertyModelObj.value.bedroomlistItemList.value.length,
+          itemBuilder: (context, index) {
+            BedroomlistItemModel model = myPropertyController
+                .myPropertyModelObj.value.bedroomlistItemList.value[index];
 
-              return Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.v),
-                ),
-                elevation: 2,
-                child: Padding(
-                  padding: EdgeInsets.all(16.v),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BedroomlistItemWidget(model),
-                      SizedBox(height: 8.v),
-                      Text(
+            return Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.v),
+              ),
+              elevation: 2,
+              child: Padding(
+                padding: EdgeInsets.all(16.v),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AbsorbPointer(
+                      absorbing: true, // Disable only this part
+                      child: BedroomlistItemWidget(model),
+                    ),
+                    SizedBox(height: 8.v),
+                    AbsorbPointer(
+                      absorbing: true, // Disable only this part
+                      child: Text(
                         model.isAvailable
                             ? "Status: Available"
                             : "Status: Not Available",
@@ -119,74 +124,76 @@ class _MyPropertyScreenState extends State<MyPropertyScreen> {
                           color: model.isAvailable ? Colors.green : Colors.red,
                         ),
                       ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () async {
-                                // Wait for result from EditPropertyScreen
-                                bool? isUpdated = await Get.to(
-                                  () => EditPropertyScreen(property: model),
-                                );
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () async {
+                              // Wait for result from EditPropertyScreen
+                              bool? isUpdated = await Get.to(
+                                () => EditPropertyScreen(property: model),
+                              );
 
-                                // If updated, refresh properties
-                                if (isUpdated == true) {
-                                  myPropertyController.fetchProperties();
-                                }
-                              },
-                              child: Text('Edit',
-                                  style: TextStyle(color: Colors.white)),
-                            ),
-                            SizedBox(width: 8.v),
-                            ElevatedButton(
-                              onPressed: () async {
-                                bool confirmDelete = await showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: Text('Delete Property'),
-                                    content: Text(
-                                        'Are you sure you want to delete this property?'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.of(context).pop(false),
-                                        child: Text('Cancel'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.of(context).pop(true),
-                                        child: Text('Delete'),
-                                      ),
-                                    ],
-                                  ),
-                                );
+                              // If updated, refresh properties
+                              if (isUpdated == true) {
+                                myPropertyController.fetchProperties();
+                              }
+                            },
+                            child: Text('Edit',
+                                style: TextStyle(color: Colors.white)),
+                          ),
+                          SizedBox(width: 8.v),
+                          ElevatedButton(
+                            onPressed: () async {
+                              bool confirmDelete = await showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text('Delete Property'),
+                                  content: Text(
+                                      'Are you sure you want to delete this property?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(false),
+                                      child: Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(true),
+                                      child: Text('Delete'),
+                                    ),
+                                  ],
+                                ),
+                              );
 
-                                if (confirmDelete) {
-                                  await myPropertyController
-                                      .deleteProperty(model);
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red,
-                              ),
-                              child: Text(
-                                'Delete',
-                                style: TextStyle(color: Colors.white),
-                              ),
+                              if (confirmDelete) {
+                                await myPropertyController.deleteProperty(model);
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
                             ),
-                          ],
-                        ),
+                            child: Text(
+                              'Delete',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+
 }

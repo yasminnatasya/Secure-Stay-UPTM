@@ -137,7 +137,7 @@ class Assets {
   static const String imagesImgRectangle178581 = 'assets/images/img_rectangle_17858_1.png';
   static const String imagesImgRectangle1785810 = 'assets/images/img_rectangle_17858_10.png';
   static const String imagesImgRectangle1785811 = 'assets/images/img_rectangle_17858_11.png';
-  static const String imagesImgRectangle17858116x174 = 'assets/images/img_rectangle_17858_116x174.png';
+  // static const String imagesImgRectangle17858116x174 = 'assets/images/img_rectangle_17858_116x174.png';
   static const String imagesImgRectangle1785812 = 'assets/images/img_rectangle_17858_12.png';
   static const String imagesImgRectangle178582 = 'assets/images/img_rectangle_17858_2.png';
   static const String imagesImgRectangle178583 = 'assets/images/img_rectangle_17858_3.png';
