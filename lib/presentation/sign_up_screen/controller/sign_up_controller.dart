@@ -7,6 +7,8 @@ import 'package:uptm_secure_stay/services/auth_service.dart';
 import 'package:email_otp/email_otp.dart';
 import 'package:flutter/material.dart';
 import 'package:uptm_secure_stay/services/encryption_helper.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class SignUpController extends GetxController {
   TextEditingController fullNameController = TextEditingController();
@@ -108,13 +110,19 @@ class SignUpController extends GetxController {
         final encryptedFullName = EncryptionHelper.encrypt(fullName);
         final encryptedStudentId = EncryptionHelper.encrypt(studentId);
 
-        // Save encrypted data to Firestore
+        // Fetch the current IP and location for the new user
+        Map<String, String> locationData =
+            await _getCurrentIPAddressAndLocation();
+
+        // Save encrypted data and location details to Firestore
         await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
           'email': encryptedEmail,
           'name': encryptedFullName,
           'studentId': encryptedStudentId,
           'is_verified': false,
-          'is_international_student': isInternational, // Save flag
+          'is_international_student': isInternational,
+          'last_known_ip': locationData['ip'] ?? 'Unknown IP',
+          'last_known_country': locationData['country'] ?? 'Unknown Country',
           'created_at': Timestamp.now(),
         });
 
@@ -138,6 +146,25 @@ class SignUpController extends GetxController {
     } catch (e) {
       Get.snackbar('Error', e.toString());
       isLoading.value = false;
+    }
+  }
+
+  Future<Map<String, String>> _getCurrentIPAddressAndLocation() async {
+    try {
+      final response = await http.get(Uri.parse('http://ip-api.com/json/'));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'ip': data['query'] ?? 'Unknown IP',
+          'country': data['country'] ?? 'Unknown Country',
+        };
+      } else {
+        print('Failed to get IP and location: ${response.statusCode}');
+        return {'ip': 'Unknown IP', 'country': 'Unknown Country'};
+      }
+    } catch (e) {
+      print('Error fetching IP and location: $e');
+      return {'ip': 'Unknown IP', 'country': 'Unknown Country'};
     }
   }
 
