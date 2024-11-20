@@ -249,8 +249,8 @@ class ImageConstant {
   static String imgGroup38134Black900 =
       '$imagePath/img_group_38134_black_900.svg';
 
-  static String imgRectangle17858116x174 =
-      '$imagePath/img_rectangle_17858_116x174.png';
+  // static String imgRectangle17858116x174 =
+  //     '$imagePath/img_rectangle_17858_116x174.png';
 
   static String imgRectangle34624202 = '$imagePath/img_rectangle_34624202.png';
 
