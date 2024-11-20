@@ -17,16 +17,10 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   void initState() {
-    getCheck();
-    Future.delayed(const Duration(milliseconds: 3000), () {
-      signIn == false
-          ? onboarding == true
-              ? Get.toNamed(AppRoutes.logInActiveScreen)
-              : Get.toNamed(AppRoutes.onboardingScreen)
-          : Get.toNamed(AppRoutes.homeScreenContainerScreen);
-    });
     super.initState();
-    _navigateToNextScreen();
+    Future.delayed(const Duration(milliseconds: 3000), () {
+      Get.offNamed(AppRoutes.onboardingScreen); // Always navigate to onboarding
+    });
   }
 
   Future<void> _navigateToNextScreen() async {
