@@ -1,4 +1,5 @@
 import 'package:uptm_secure_stay/main.dart';
+import 'package:uptm_secure_stay/presentation/chat_details_screen/controller/chat_details_controller.dart';
 import 'package:uptm_secure_stay/presentation/log_in_active_screen/controller/log_in_active_controller.dart';
 import 'package:uptm_secure_stay/widgets/restart_widget.dart';
 
@@ -168,6 +169,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _logOutUser() async {
     try {
+      // Dispose the ChatDetailsController
+      Get.delete<ChatDetailsController>();
+
+      // Sign out from Firebase Auth
       await FirebaseAuth.instance.signOut();
       print("Firebase sign-out successful.");
     } catch (e) {

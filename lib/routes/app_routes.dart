@@ -18,8 +18,6 @@ import 'package:uptm_secure_stay/presentation/verification_screen/binding/verifi
 
 import 'package:uptm_secure_stay/presentation/reset_password_screen/reset_password_screen.dart';
 import 'package:uptm_secure_stay/presentation/reset_password_screen/binding/reset_password_binding.dart';
-import 'package:uptm_secure_stay/presentation/basic_details_screen/basic_details_screen.dart';
-import 'package:uptm_secure_stay/presentation/basic_details_screen/binding/basic_details_binding.dart';
 import 'package:uptm_secure_stay/presentation/identity_screen/identity_screen.dart';
 import 'package:uptm_secure_stay/presentation/identity_screen/binding/identity_binding.dart';
 import 'package:uptm_secure_stay/presentation/hobbies_screen/hobbies_screen.dart';
@@ -52,8 +50,6 @@ import 'package:uptm_secure_stay/presentation/chat_details_screen/chat_details_s
 import 'package:uptm_secure_stay/presentation/chat_details_screen/binding/chat_details_binding.dart';
 import 'package:uptm_secure_stay/presentation/call_details_screen/call_details_screen.dart';
 import 'package:uptm_secure_stay/presentation/call_details_screen/binding/call_details_binding.dart';
-import 'package:uptm_secure_stay/presentation/videocall_details_screen/videocall_details_screen.dart';
-import 'package:uptm_secure_stay/presentation/videocall_details_screen/binding/videocall_details_binding.dart';
 // import 'package:uptm_secure_stay/presentation/add_property_home_screen/add_property_home_screen.dart';
 // import 'package:uptm_secure_stay/presentation/add_property_home_screen/binding/add_property_home_binding.dart';
 
@@ -69,10 +65,6 @@ import 'package:uptm_secure_stay/presentation/add_personal_details_screen/bindin
 // import 'package:uptm_secure_stay/presentation/add_property_location_screen/add_property_location_screen.dart';
 // import 'package:uptm_secure_stay/presentation/add_property_location_screen/binding/add_property_location_binding.dart';
 
-// not in use
-import 'package:uptm_secure_stay/presentation/add_event_one_screen/add_event_one_screen.dart';
-import 'package:uptm_secure_stay/presentation/add_event_one_screen/binding/add_event_one_binding.dart';
-
 // import 'package:uptm_secure_stay/presentation/event_location_screen/event_location_screen.dart';
 // import 'package:uptm_secure_stay/presentation/event_location_screen/binding/event_location_binding.dart';
 
@@ -86,13 +78,9 @@ import 'package:uptm_secure_stay/presentation/my_property_screen/my_property_scr
 import 'package:uptm_secure_stay/presentation/my_property_screen/binding/my_property_binding.dart';
 import 'package:uptm_secure_stay/presentation/my_cards_screen/my_cards_screen.dart';
 import 'package:uptm_secure_stay/presentation/my_cards_screen/binding/my_cards_binding.dart';
-import 'package:uptm_secure_stay/presentation/add_new_card_screen/add_new_card_screen.dart';
-import 'package:uptm_secure_stay/presentation/add_new_card_screen/binding/add_new_card_binding.dart';
 
 import 'package:uptm_secure_stay/presentation/settings_screen/settings_screen.dart';
 import 'package:uptm_secure_stay/presentation/settings_screen/binding/settings_binding.dart';
-import 'package:uptm_secure_stay/presentation/add_new_address_screen/add_new_address_screen.dart';
-import 'package:uptm_secure_stay/presentation/add_new_address_screen/binding/add_new_address_binding.dart';
 import 'package:uptm_secure_stay/presentation/my_address_screen/my_address_screen.dart';
 import 'package:uptm_secure_stay/presentation/my_address_screen/binding/my_address_binding.dart';
 import 'package:uptm_secure_stay/presentation/edit_address_screen/edit_address_screen.dart';
@@ -292,14 +280,6 @@ class AppRoutes {
       ],
     ),
     GetPage(
-      name: basicDetailsScreen,
-      page: () => BasicDetailsScreen(),
-      transition: Transition.rightToLeft,
-      bindings: [
-        BasicDetailsBinding(),
-      ],
-    ),
-    GetPage(
       name: identityScreen,
       page: () => IdentityScreen(),
       transition: Transition.rightToLeft,
@@ -460,14 +440,6 @@ class AppRoutes {
         CallDetailsBinding(),
       ],
     ),
-    GetPage(
-      name: videocallDetailsScreen,
-      page: () => VideocallDetailsScreen(),
-      transition: Transition.rightToLeft,
-      bindings: [
-        VideocallDetailsBinding(),
-      ],
-    ),
     // GetPage(
     //   name: addPropertyHomeScreen,
     //   page: () => AddPropertyHomeScreen(),
@@ -509,14 +481,6 @@ class AppRoutes {
     //     AddPropertyLocationBinding(),
     //   ],
     // ),
-    GetPage(
-      name: addEventOneScreen,
-      page: () => AddEventOneScreen(),
-      transition: Transition.downToUp,
-      bindings: [
-        AddEventOneBinding(),
-      ],
-    ),
 
     // GetPage(
     //   name: eventLocationScreen,
@@ -584,14 +548,6 @@ class AppRoutes {
         MyCardsBinding(),
       ],
     ),
-    GetPage(
-      name: addNewCardScreen,
-      page: () => AddNewCardScreen(),
-      transition: Transition.rightToLeft,
-      bindings: [
-        AddNewCardBinding(),
-      ],
-    ),
 
     GetPage(
       name: settingsScreen,
@@ -599,14 +555,6 @@ class AppRoutes {
       transition: Transition.rightToLeft,
       bindings: [
         SettingsBinding(),
-      ],
-    ),
-    GetPage(
-      name: addNewAddressScreen,
-      page: () => AddNewAddressScreen(),
-      transition: Transition.rightToLeft,
-      bindings: [
-        AddNewAddressBinding(),
       ],
     ),
     GetPage(

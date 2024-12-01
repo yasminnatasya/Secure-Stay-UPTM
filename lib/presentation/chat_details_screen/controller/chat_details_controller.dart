@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -11,7 +13,7 @@ import 'package:uptm_secure_stay/services/encryption_helper.dart';
 class ChatDetailsController extends GetxController {
   Rx<ChatDetailsModel> chatDetailsModelObj = ChatDetailsModel().obs;
   TextEditingController messageController = TextEditingController();
-
+  StreamSubscription<QuerySnapshot>? _notificationSubscription;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -33,7 +35,30 @@ class ChatDetailsController extends GetxController {
     );
 
     // Listen for notifications
-    listenForNotifications();
+    // listenForNotifications();
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    // Listen to authentication state changes
+    _auth.authStateChanges().listen((User? user) {
+      if (user != null) {
+        // User is signed in, start listening for notifications
+        listenForNotifications();
+      } else {
+        // User is signed out, cancel the notification listener
+        _notificationSubscription?.cancel();
+        _notificationSubscription = null;
+      }
+    });
+  }
+
+  @override
+  void onClose() {
+    _notificationSubscription?.cancel();
+    super.onClose();
   }
 
   Future<void> sendOtpToOwner(String ownerId, String chatId,
@@ -147,17 +172,41 @@ class ChatDetailsController extends GetxController {
   }
 
   void listenForNotifications() {
+    // Cancel any existing listener
+    _notificationSubscription?.cancel();
+
     final currentUserId = _auth.currentUser?.uid;
     if (currentUserId == null) return;
 
-    _firestore
+    _notificationSubscription = _firestore
         .collection('notifications')
         .where('receiverId', isEqualTo: currentUserId)
+        .where('read', isEqualTo: false)
         .snapshots()
         .listen((querySnapshot) {
       for (var docChange in querySnapshot.docChanges) {
         if (docChange.type == DocumentChangeType.added) {
           final notificationData = docChange.doc.data() as Map<String, dynamic>;
+
+          // Use dynamic currentUserId inside the listener
+          final currentUserId = _auth.currentUser?.uid;
+          if (currentUserId == null) {
+            print('Current user ID is null inside listener');
+            continue;
+          }
+
+          final senderId = notificationData['senderId'];
+          final receiverId = notificationData['receiverId'];
+          print('Notification Data: $notificationData');
+          print('Current User ID: $currentUserId');
+          print('Sender ID: $senderId');
+          print('Receiver ID: $receiverId');
+
+          // Skip notifications sent by the current user
+          if (senderId == currentUserId) {
+            print('Skipping notification sent by the current user');
+            continue;
+          }
 
           // Decrypt the sender's name
           String senderName = notificationData['title'] ?? 'New Message';
@@ -175,12 +224,10 @@ class ChatDetailsController extends GetxController {
           final timeElapsed =
               timestamp != null ? _formatTimeElapsed(timestamp) : 'Just now';
 
-          // Check if the user is not on ChatDetailsScreen
-          if (!Get.currentRoute.contains('ChatDetailsScreen')) {
-            showNotification(senderName, '$body - $timeElapsed');
-          }
+          // Show notification
+          showNotification(senderName, '$body - $timeElapsed');
 
-          // Optionally mark notification as read
+          // Mark notification as read
           _firestore.collection('notifications').doc(docChange.doc.id).update({
             'read': true,
           });
